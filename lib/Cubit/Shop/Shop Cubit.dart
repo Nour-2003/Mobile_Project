@@ -17,7 +17,7 @@ class ShopCubit extends Cubit<ShopStates> {
   List<Widget> screens = [
     HomePage(),
     SearchScreen(),
-    CartScreen(),
+    CartPage(),
     ProfileScreen(),
   ];
 
