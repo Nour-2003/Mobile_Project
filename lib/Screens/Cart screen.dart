@@ -75,7 +75,6 @@ class _CartPageState extends State<CartPage> {
 
   Widget _buildCartItem(CartItem item) {
     return Card(
-      color: Colors.white,
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
@@ -173,7 +172,6 @@ class _CartPageState extends State<CartPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
@@ -238,6 +236,7 @@ class _CartPageState extends State<CartPage> {
       appBar: AppBar(
         title: const Text('Shopping Cart'),
         elevation: 0,
+        centerTitle: true,
       ),
       body: _items.isEmpty
           ? const Center(

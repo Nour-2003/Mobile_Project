@@ -15,17 +15,21 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   List<OnBoardingModel> onBoarding = [
     OnBoardingModel(
-        image: 'Images/Digital_Shopping-transformed.png',
-        title: 'Purchase Online',
-        body: 'Screen Body'),
+      image: 'Images/Digital_Shopping-transformed.png',
+      title: 'Purchase Online',
+      body: 'Easily browse and shop for your favorite items from the comfort of your home.',
+    ),
     OnBoardingModel(
-        image: 'Images/Digital_Shopping_(1)-transformed.png',
-        title: 'Track Your Order',
-        body: 'Screen Body'),
+      image: 'Images/Digital_Shopping_(1)-transformed.png',
+      title: 'Track Your Order',
+      body: 'Monitor the status of your order and get real-time updates on its delivery.',
+    ),
     OnBoardingModel(
-        image: 'Images/Online Shopping.png',
-        title: 'Get Your Order',
-        body: 'Screen Body'),
+      image: 'Images/Online Shopping.png',
+      title: 'Get Your Order',
+      body: 'Receive your order at your doorstep, hassle-free and on time.',
+    ),
+
   ];
 
   @override
@@ -36,6 +40,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         // backgroundColor: Colors.white,
         actions: [
           TextButton(
@@ -115,7 +120,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           child: Image.asset(model.image, width: screenWidth * 0.8), // Adjust image size based on screen width
         ),
       ),
-      SizedBox(height: screenHeight * 0.05), // Add space between the image and text
+      SizedBox(height: screenHeight * 0.01), // Add space between the image and text
       Padding(
         padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
         child: Text(

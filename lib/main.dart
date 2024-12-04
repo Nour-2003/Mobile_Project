@@ -5,10 +5,14 @@ import 'package:mobileproject/Screens/Login%20Screen.dart';
 import 'Cubit/Shop/Shop Cubit.dart';
 import 'Cubit/Theme/Theme Cubit.dart';
 import 'Cubit/Theme/Theme States.dart';
+import 'Dio/Dio Package.dart';
 import 'Screens/OnBoarding Screen.dart';
+import 'Shared/Constants.dart';
 import 'Shared/Themes.dart';
 
 void main() {
+  Bloc.observer = MyBlocObserver();
+  DioHelper.init();
   runApp( MyApp());
 }
 

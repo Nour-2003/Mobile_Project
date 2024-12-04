@@ -67,7 +67,6 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 // User Details Section
                 Card(
-                  color: Theme.of(context).cardColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -80,6 +79,8 @@ class ProfileScreen extends StatelessWidget {
                           leading: Icon(Icons.person, color: Colors.blue),
                           title: Text(
                             name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.montserrat(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -91,6 +92,8 @@ class ProfileScreen extends StatelessWidget {
                           leading: Icon(Icons.email, color: Colors.green),
                           title: Text(
                             email,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                             style: GoogleFonts.montserrat(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -102,6 +105,8 @@ class ProfileScreen extends StatelessWidget {
                           leading: Icon(Icons.phone, color: Colors.orange),
                           title: Text(
                             phone,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.montserrat(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
