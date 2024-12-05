@@ -61,7 +61,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return BlocProvider(
       create: (context) => ShopCubit()
         ..loadProducts(
-            ShopCubit.get(context).productModel.products), // Load products here
+            ShopCubit.get(context).firebaseProducts), // Load products here
       child: BlocBuilder<ShopCubit, ShopStates>(
         builder: (context, state) {
           var cubit = ShopCubit.get(context);
@@ -177,7 +177,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                     topRight: Radius.circular(15),
                                   ),
                                   child: Image(
-                                    image: NetworkImage(product.image),
+                                    image: NetworkImage(product['imageUrl']),
                                     height: 150,
                                     width: double.infinity,
                                     fit: BoxFit.cover,
@@ -189,7 +189,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "${product.title}",
+                                        "${product['title']}",
                                         maxLines: 2,
                                         style: GoogleFonts.montserrat(
                                             fontSize: 14, fontWeight: FontWeight.bold),
@@ -197,7 +197,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                       ),
                                       const SizedBox(height: 5),
                                       Text(
-                                        "${product.category}",
+                                        "${product['category']}",
                                         style: GoogleFonts.montserrat(
                                           fontSize: 12,
                                           color: Colors.grey,
@@ -210,7 +210,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              "\$${product.price}",
+                                              "\$${product['price']}",
                                               style: GoogleFonts.montserrat(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.bold,
@@ -244,7 +244,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                               children: List.generate(
                                                 5, // Assuming a 5-star rating system
                                                     (starIndex) => Icon(
-                                                  starIndex < product.rating.rate
+                                                  starIndex < double.parse(product['rating'])
                                                       ? Icons.star
                                                       : Icons.star_border,
                                                   color: Colors.amber,
@@ -254,7 +254,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                             ),
                                             const SizedBox(width: 5),
                                             Text(
-                                              "${product.rating.rate.toStringAsFixed(1)}", // Display numerical rating
+                                              "${product['rating']}", // Display numerical rating
                                               style: GoogleFonts.montserrat(
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.bold,

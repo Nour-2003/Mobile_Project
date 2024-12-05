@@ -1,6 +1,8 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'Show Order Page.dart';
 class CartItem {
   final String id;
   final String name;
@@ -206,9 +208,16 @@ class _CartPageState extends State<CartPage> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Proceeding to checkout...')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ShowOrderPage(
+                    orderItems: _items, // Pass the cart items
+                    orderTotal: total,  // Pass the cart total
+                  ),
+                ),
               );
+
             },
             style: ElevatedButton.styleFrom(
               minimumSize: const Size.fromHeight(50),

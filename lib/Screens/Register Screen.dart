@@ -1,3 +1,6 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -48,7 +51,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
       });
     }
   }
+  CollectionReference Users = FirebaseFirestore.instance.collection('Users');
 
+  Future<void> addUser() {
+    // Call the user's CollectionReference to add a new user
+    return Users
+        .add({
+      'name': nameController.text, // John Doe
+      'email': emailController.text, // Stokes and Sons
+      'phone': phoneController.text, // 42
+      'dateOfBirth': dateController.text, // 42// 42
+    })
+        .then((value) => print("User Added"))
+        .catchError((error) => print("Failed to add user: $error"));
+  }
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -200,14 +216,46 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async{
                               if (formKey.currentState!.validate()) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => MainScreen(),
-                                  ),
-                                );
+                                try {
+                                  final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                                    email: emailController.text,
+                                    password: passwordController.text,
+                                  );
+                                  addUser();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => MainScreen(),
+                                    ),
+                                  );
+                                } on FirebaseAuthException catch (e) {
+                                  if (e.code == 'weak-password') {
+                                    print('The password provided is too weak.');
+                                    AwesomeDialog(
+                                      context: context,
+                                      dialogType: DialogType.error,
+                                      animType: AnimType.rightSlide,
+                                      title: 'Sign up Error',
+                                      desc:
+                                      'The password provided is too weak.',
+                                    )..show();
+                                  } else if (e.code == 'email-already-in-use') {
+                                    print('The account already exists for that email.');
+                                    AwesomeDialog(
+                                      context: context,
+                                      dialogType: DialogType.error,
+                                      animType: AnimType.rightSlide,
+                                      title: 'Dialog Title',
+                                      desc:
+                                      'The account already exists for that email.',
+                                    )..show();
+                                  }
+                                } catch (e) {
+                                  print(e);
+                                }
+
                               }
                             },
                             style: ButtonStyle(

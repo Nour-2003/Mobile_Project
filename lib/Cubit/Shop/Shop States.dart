@@ -16,3 +16,25 @@ class ShopLoadingCatProductsDataState extends ShopStates{}
 class ShopSuccessCatProductsDataState extends ShopStates{}
 class ShopErrorCatProductsDataState extends ShopStates{}
 
+class GetFirebaseDataState extends ShopStates{}
+class UserLoading extends ShopStates {}
+
+// Success state with user data
+class UserLoaded extends ShopStates {
+  final Map<String, dynamic> userData;
+
+  UserLoaded(this.userData);
+
+  @override
+  List<Object?> get props => [userData];
+}
+
+// Error state
+class UserError extends ShopStates {
+  final String error;
+
+  UserError(this.error);
+
+  @override
+  List<Object?> get props => [error];
+}

@@ -5,9 +5,9 @@ class ProductDetails extends StatelessWidget {
   final String title;
   final String imageUrl;
   final String description;
-  final double price;
-  final double rating;
-  final int reviews;
+  final String price;
+  final String rating;
+  final String reviews;
 
   const ProductDetails({
     required this.title,

@@ -1,4 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,7 @@ class HomePage extends StatelessWidget {
     "men's clothing",
     "women's clothing"
   ];
+ List Data = [];
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +35,8 @@ class HomePage extends StatelessWidget {
         builder: (context, state) {
           List<Product> products = ShopCubit.get(context).productModel.products;
           print(products.length);
+          Data = ShopCubit.get(context).firebaseProducts;
+          print("Fire Base Data Here "+ Data.length.toString());
           return Scaffold(
             appBar: AppBar(
               title: Text('Home Page'),
@@ -119,7 +123,7 @@ class HomePage extends StatelessWidget {
                             fontSize: 25, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 20),
                     ConditionalBuilder(
-                      condition: products.isNotEmpty,
+                      condition: Data.isNotEmpty,
                       fallback: (context) => Center(
                         child: Center(
                             child: CircularProgressIndicator(
@@ -139,21 +143,21 @@ class HomePage extends StatelessWidget {
                             childAspectRatio: 0.57,
                             physics: const NeverScrollableScrollPhysics(),
                             crossAxisCount: 2,
-                            children: List.generate(products.length, (index) {
+                            children: List.generate(Data.length, (index) {
                               return GestureDetector(
                                 onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => ProductDetails(
-                                            title: products[index].title,
-                                            imageUrl: products[index].image,
+                                            title: Data[index]['title'],
+                                            imageUrl: Data[index]['imageUrl'],
                                             description:
-                                                products[index].description,
-                                            price: products[index].price,
-                                            rating: products[index].rating.rate,
+                                            Data[index]['description'],
+                                            price: Data[index]['price'],
+                                            rating: Data[index]['rating'],
                                             reviews:
-                                                products[index].rating.count)),
+                                            Data[index]['count'])),
                                   );
                                 },
                                 onLongPress: () {
@@ -184,7 +188,7 @@ class HomePage extends StatelessWidget {
                                                   borderRadius:
                                                       BorderRadius.circular(10),
                                                   child: Image.network(
-                                                    products[index].image,
+                                                    Data[index]['imageUrl'],
                                                     height: 250,
                                                     width: double.infinity,
                                                     fit: BoxFit.cover,
@@ -192,14 +196,14 @@ class HomePage extends StatelessWidget {
                                                 ),
                                                 const SizedBox(height: 10),
                                                 Text(
-                                                  "Category: ${products[index].category}",
+                                                  "Category: ${Data[index]['category']}",
                                                   style: GoogleFonts.montserrat(
                                                       fontSize: 14,
                                                       color: Colors.grey[700]),
                                                 ),
                                                 const SizedBox(height: 5),
                                                 Text(
-                                                  "Price: \$${products[index].price}",
+                                                  "Price: \$${Data[index]['price']}",
                                                   style: GoogleFonts.montserrat(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.bold,
@@ -208,14 +212,14 @@ class HomePage extends StatelessWidget {
                                                 ),
                                                 const SizedBox(height: 5),
                                                 Text(
-                                                  "Rating: ${products[index].rating.rate} (${products[index].rating.count} reviews)",
+                                                  "Rating: ${Data[index]['rating']} (${Data[index]['count']} reviews)",
                                                   style: GoogleFonts.montserrat(
                                                       fontSize: 14,
                                                       color: Colors.amber),
                                                 ),
                                                 const SizedBox(height: 10),
                                                 Text(
-                                                  products[index].description,
+                                                  Data[index]['description'],
                                                   style: GoogleFonts.montserrat(
                                                       fontSize: 14,
                                                       color: Colors.grey[800]),
@@ -265,7 +269,7 @@ class HomePage extends StatelessWidget {
                                         ),
                                         child: Image(
                                           image: NetworkImage(
-                                              products[index].image),
+                                              Data[index]['imageUrl']),
                                           height: 150,
                                           width: double.infinity,
                                           fit: BoxFit.cover,
@@ -279,7 +283,7 @@ class HomePage extends StatelessWidget {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              "${products[index].title}",
+                                              "${Data[index]['title']}",
                                               maxLines: 2,
                                               style: GoogleFonts.montserrat(
                                                   fontSize: 14,
@@ -288,7 +292,7 @@ class HomePage extends StatelessWidget {
                                             ),
                                             const SizedBox(height: 5),
                                             Text(
-                                              "${products[index].category}",
+                                              "${Data[index]['category']}",
                                               style: GoogleFonts.montserrat(
                                                 fontSize: 12,
                                                 color: Colors.grey,
@@ -305,7 +309,7 @@ class HomePage extends StatelessWidget {
                                                         .spaceBetween,
                                                 children: [
                                                   Text(
-                                                    "\$${products[index].price}",
+                                                    "\$${Data[index]['price']}",
                                                     style:
                                                         GoogleFonts.montserrat(
                                                             fontSize: 14,
@@ -352,9 +356,7 @@ class HomePage extends StatelessWidget {
                                                       // Assuming a 5-star rating system
                                                       (starIndex) => Icon(
                                                         starIndex <
-                                                                products[index]
-                                                                    .rating
-                                                                    .rate
+                                                            double.parse(Data[index]['rating'])
                                                             ? Icons.star
                                                             : Icons.star_border,
                                                         color: Colors.amber,
@@ -364,7 +366,7 @@ class HomePage extends StatelessWidget {
                                                   ),
                                                   const SizedBox(width: 5),
                                                   Text(
-                                                    "${products[index].rating.rate.toStringAsFixed(1)}",
+                                                    "${Data[index]['rating']}",
                                                     // Display numerical rating
                                                     style:
                                                         GoogleFonts.montserrat(

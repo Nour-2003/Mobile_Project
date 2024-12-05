@@ -1,4 +1,5 @@
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobileproject/Cubit/Shop/Shop%20States.dart';
@@ -10,7 +11,7 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (BuildContext context) => ShopCubit()..getHomeData(),
+      create: (BuildContext context) => ShopCubit()..getHomeData()..getData()..getUserByEmail(FirebaseAuth.instance.currentUser!.email!),
       child: BlocConsumer<ShopCubit,ShopStates>(
         listener: (context, state) {},
         builder: (context, state) {
@@ -24,7 +25,9 @@ class MainScreen extends StatelessWidget {
                   BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
 
                   BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
+                  BottomNavigationBarItem(icon: Icon(Icons.add_shopping_cart), label: 'Add Product'),
                   BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+
                 ],
                 currentIndex: cubit.currentIndex,
                 onTap: (index) {
