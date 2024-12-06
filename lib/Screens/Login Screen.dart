@@ -28,7 +28,7 @@ class _LoginPageState extends State<LoginPage> {
     });
     super.initState();
   }
-
+  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
     var emailController = TextEditingController();
@@ -163,6 +163,9 @@ class _LoginPageState extends State<LoginPage> {
                                   // }
                                   if (FormKey.currentState!.validate()) {
                                     try {
+                                     setState(() {
+                                       isLoading = true;
+                                     });
                                       final credential = await FirebaseAuth
                                           .instance
                                           .signInWithEmailAndPassword(
@@ -196,7 +199,9 @@ class _LoginPageState extends State<LoginPage> {
                                       EdgeInsets.symmetric(
                                           horizontal: 20, vertical: 10)),
                                 ),
-                                child: Text(
+                                child: isLoading ? CircularProgressIndicator(
+                                  color: Colors.white,
+                                ):Text(
                                   'LOGIN',
                                   style: TextStyle(
                                       fontSize: 18, color: Colors.white),

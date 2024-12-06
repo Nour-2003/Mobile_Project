@@ -26,17 +26,20 @@ class HomePage extends StatelessWidget {
     "men's clothing",
     "women's clothing"
   ];
- List Data = [];
+  List Data = [];
+  List categories = [];
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ShopCubit, ShopStates>(
-        listener: (context, state) {},
+        listener: (context, state) {
+        },
         builder: (context, state) {
           List<Product> products = ShopCubit.get(context).productModel.products;
           print(products.length);
           Data = ShopCubit.get(context).firebaseProducts;
-          print("Fire Base Data Here "+ Data.length.toString());
+          print("Fire Base Data Here " + Data.length.toString());
+          categories = ShopCubit.get(context).firebaseCategories;
           return Scaffold(
             appBar: AppBar(
               title: Text('Home Page'),
@@ -54,68 +57,78 @@ class HomePage extends StatelessWidget {
                         style: GoogleFonts.montserrat(
                             fontSize: 25, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 15),
-                    Container(
-                      height: 100,
-                      child: ListView.separated(
-                        physics: const BouncingScrollPhysics(),
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) => GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CategoryScreen(
-                                  categoryName: names[index],
+                    ConditionalBuilder(
+                        condition: categories.isNotEmpty,
+                      fallback: (context) => Center(
+                        child: CircularProgressIndicator(
+                          color: defaultcolor,
+                        ),
+                      ),
+                      builder: (context){
+                            return Container(
+                              height: 100,
+                              child: ListView.separated(
+                                physics: const BouncingScrollPhysics(),
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (context, index) => GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => CategoryScreen(
+                                          categoryName: categories[index]['name'],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Stack(
+                                    children: [
+                                      ClipRRect(
+                                        child: Container(
+                                          width: 100,
+                                          height: 100,
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(10),
+                                              topRight: Radius.circular(10),
+                                            ),
+                                          ),
+                                          child: Image.network(
+                                            categories[index]['imageUrl'],
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        child: Container(
+                                          color: Colors.black.withOpacity(0.8),
+                                          padding: const EdgeInsets.all(5),
+                                          child: Text(
+                                            categories[index]['name'],
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                            style: GoogleFonts.montserrat(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                                separatorBuilder: (context, index) =>
+                                const SizedBox(width: 10),
+                                itemCount: categories.length,
                               ),
                             );
-                          },
-                          child: Stack(
-                            children: [
-                              ClipRRect(
-                                child: Container(
-                                  width: 100,
-                                  height: 100,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(10),
-                                      topRight: Radius.circular(10),
-                                    ),
-                                  ),
-                                  child: Image.asset(
-                                    images[index],
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                child: Container(
-                                  color: Colors.black.withOpacity(0.8),
-                                  padding: const EdgeInsets.all(5),
-                                  child: Text(
-                                    names[index],
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                    style: GoogleFonts.montserrat(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(width: 10),
-                        itemCount: images.length,
-                      ),
+                      },
                     ),
                     const SizedBox(height: 25),
                     Text('Top Products:',
@@ -152,12 +165,13 @@ class HomePage extends StatelessWidget {
                                         builder: (context) => ProductDetails(
                                             title: Data[index]['title'],
                                             imageUrl: Data[index]['imageUrl'],
-                                            description:
-                                            Data[index]['description'],
+                                            description: Data[index]
+                                                ['description'],
                                             price: Data[index]['price'],
                                             rating: Data[index]['rating'],
-                                            reviews:
-                                            Data[index]['count'])),
+                                            reviews: Data[index]['count'],
+                                          category: Data[index]['category'],
+                                        )),
                                   );
                                 },
                                 onLongPress: () {
@@ -323,7 +337,10 @@ class HomePage extends StatelessWidget {
                                                         BorderRadius.circular(
                                                             20),
                                                     child: InkWell(
-                                                      onTap: () {},
+                                                      onTap: () async{
+                                                        await FirebaseFirestore.instance.collection('Products').doc(Data[index].id).delete();
+                                                        ShopCubit.get(context).getData();
+                                                      },
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               20),
@@ -332,9 +349,9 @@ class HomePage extends StatelessWidget {
                                                             const EdgeInsets
                                                                 .all(5),
                                                         child: Icon(
-                                                          Icons.favorite_border,
+                                                          Icons.delete,
                                                           color:
-                                                              Colors.grey[600],
+                                                              Colors.red,
                                                           size: 20,
                                                         ),
                                                       ),
@@ -356,7 +373,9 @@ class HomePage extends StatelessWidget {
                                                       // Assuming a 5-star rating system
                                                       (starIndex) => Icon(
                                                         starIndex <
-                                                            double.parse(Data[index]['rating'])
+                                                                double.parse(Data[
+                                                                        index]
+                                                                    ['rating'])
                                                             ? Icons.star
                                                             : Icons.star_border,
                                                         color: Colors.amber,

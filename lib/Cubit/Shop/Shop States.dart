@@ -38,3 +38,17 @@ class UserError extends ShopStates {
   @override
   List<Object?> get props => [error];
 }
+class ShopGetCategories extends ShopStates{
+
+}
+class ShopGetCategoriesSuccess extends ShopStates{
+
+}
+class ShopGetCategoriesError extends ShopStates{
+}
+class AddToCartSuccess extends ShopStates{}
+class AddToCartError extends ShopStates{}
+
+class GetCartData extends ShopStates{}
+class GetCartDataSuccess extends ShopStates{}
+class GetCartDataError extends ShopStates{}

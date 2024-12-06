@@ -1,5 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobileproject/Screens/Add%20Product%20Screen.dart';
@@ -17,6 +19,7 @@ class ShopCubit extends Cubit<ShopStates> {
   static ShopCubit get(context) => BlocProvider.of(context);
   List firebaseProducts = [];
   void getData() async{
+    firebaseProducts.clear();
     QuerySnapshot query = await FirebaseFirestore.instance.collection('Products').get();
     firebaseProducts.addAll(query.docs);
     emit(GetFirebaseDataState());
@@ -55,6 +58,36 @@ class ShopCubit extends Cubit<ShopStates> {
     AddProductScreen(),
     ProfileScreen(),
   ];
+  List CartItems =[];
+  void getCartData() async{
+    emit(GetCartData());
+    CollectionReference Cart = FirebaseFirestore.instance.collection('Cart');
+    Cart.where('id', isEqualTo: FirebaseAuth.instance.currentUser!.uid).get().then((querySnapshot) {
+      CartItems.addAll(querySnapshot.docs);
+      emit(GetCartDataSuccess());
+    }).catchError((error) {
+      emit(GetCartDataError());
+    });
+  }
+  void addToCart(String title,String price,String description,String category,String imageUrl,String rating,String count) async{
+    CollectionReference Cart = FirebaseFirestore.instance.collection('Cart');
+        Cart
+          .add({
+        'title':title,
+        'price': price, // Stokes and Sons
+        'description': description, // 42
+        'category': category, // 42
+        'imageUrl': imageUrl, // 42
+        'rating': rating, // 42
+        'count': count, // 42
+          "id":FirebaseAuth.instance.currentUser!.uid
+      })
+          .then((value) => {
+        print("Cart item Added"),
+        emit(AddToCartSuccess())
+      })
+          .catchError((error) => print("Failed to add item: $error"));
+  }
 
   void changeBottomNav(int index) {
     currentIndex = index;
@@ -101,6 +134,30 @@ class ShopCubit extends Cubit<ShopStates> {
   ProductModel categoryProductModel = ProductModel(
     products: [],
   );
+  List categoryProducts = [];
+List firebaseCategories = [];
+  void getCategories() async {
+    emit(ShopGetCategories());
+    try {
+      QuerySnapshot query = await FirebaseFirestore.instance.collection('Categories').get();
+      firebaseCategories = query.docs;
+      emit(ShopGetCategoriesSuccess());
+    } catch (error) {
+      emit(ShopGetCategoriesError());
+    }
+  }
+  void getProductsFromCategory(String categoryName) async {
+    emit(ShopLoadingCatProductsDataState());
+    try {
+      categoryProducts.clear();
+      QuerySnapshot query = await FirebaseFirestore.instance.collection('${categoryName}').get();
+      categoryProducts = query.docs;
+      emit(ShopSuccessCatProductsDataState());
+    } catch (error) {
+      print('Error getting products for category $categoryName: $error');
+      emit(ShopErrorCatProductsDataState());
+    }
+  }
 
   void getCatProductsData(String name) {
     emit(ShopLoadingCatProductsDataState());

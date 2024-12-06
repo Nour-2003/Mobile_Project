@@ -1,6 +1,9 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobileproject/Cubit/Shop/Shop%20Cubit.dart';
+import 'package:mobileproject/Cubit/Shop/Shop%20States.dart';
 
 import 'Show Order Page.dart';
 class CartItem {
@@ -241,31 +244,39 @@ class _CartPageState extends State<CartPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Shopping Cart'),
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: _items.isEmpty
-          ? const Center(
-        child: Text(
-          'Your cart is empty',
-          style: TextStyle(fontSize: 18),
-        ),
-      )
-          : Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _items.length,
-              itemBuilder: (context, index) => _buildCartItem(_items[index]),
-            ),
+    return BlocConsumer<ShopCubit,ShopStates>(
+      listener: (context, state) {},
+        builder: (context,state){
+        var cubit = ShopCubit.get(context);
+        List items = cubit.CartItems;
+        print(items.length);
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Shopping Cart'),
+            elevation: 0,
+            centerTitle: true,
           ),
-          _buildCheckoutSection(),
-        ],
-      ),
+          body: _items.isEmpty
+              ? const Center(
+            child: Text(
+              'Your cart is empty',
+              style: TextStyle(fontSize: 18),
+            ),
+          )
+              : Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _items.length,
+                  itemBuilder: (context, index) => _buildCartItem(_items[index]),
+                ),
+              ),
+              _buildCheckoutSection(),
+            ],
+          ),
+        );
+        }
     );
   }
 }

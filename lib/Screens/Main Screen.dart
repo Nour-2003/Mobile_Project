@@ -11,7 +11,7 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (BuildContext context) => ShopCubit()..getHomeData()..getData()..getUserByEmail(FirebaseAuth.instance.currentUser!.email!),
+      create: (BuildContext context) => ShopCubit()..getData()..getUserByEmail(FirebaseAuth.instance.currentUser!.email!)..getCategories()..getCartData(),
       child: BlocConsumer<ShopCubit,ShopStates>(
         listener: (context, state) {},
         builder: (context, state) {

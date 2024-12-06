@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobileproject/Cubit/Shop/Shop%20Cubit.dart';
+import 'package:mobileproject/Screens/Cart%20screen.dart';
 
 class ProductDetails extends StatelessWidget {
   final String title;
@@ -8,7 +10,7 @@ class ProductDetails extends StatelessWidget {
   final String price;
   final String rating;
   final String reviews;
-
+  final String category;
   const ProductDetails({
     required this.title,
     required this.imageUrl,
@@ -16,6 +18,7 @@ class ProductDetails extends StatelessWidget {
     required this.price,
     required this.rating,
     required this.reviews,
+    required this.category,
     Key? key,
   }) : super(key: key);
 
@@ -125,7 +128,7 @@ class ProductDetails extends StatelessWidget {
                 children: [
                   ElevatedButton.icon(
                     onPressed: () {
-                      // Add to cart functionality
+                  ShopCubit.get(context).addToCart(title, price, description, category, imageUrl, rating, reviews);
                     },
                     icon: const Icon(Icons.shopping_cart),
                     label: const Text('Add to Cart'),

@@ -65,6 +65,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         .then((value) => print("User Added"))
         .catchError((error) => print("Failed to add user: $error"));
   }
+  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -218,6 +219,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: ElevatedButton(
                             onPressed: () async{
                               if (formKey.currentState!.validate()) {
+                                setState(() {
+                                  isLoading = true;
+                                });
                                 try {
                                   final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
                                     email: emailController.text,
@@ -274,7 +278,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                               ),
                             ),
-                            child: Text(
+                            child: isLoading ?CircularProgressIndicator(color: Colors.white,): Text(
                               'Sign Up',
                               style: TextStyle(
                                 fontSize: 18,
