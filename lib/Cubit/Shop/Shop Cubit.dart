@@ -59,35 +59,44 @@ class ShopCubit extends Cubit<ShopStates> {
     ProfileScreen(),
   ];
   List CartItems =[];
-  void getCartData() async{
+  void getCartData() {
     emit(GetCartData());
-    CollectionReference Cart = FirebaseFirestore.instance.collection('Cart');
-    Cart.where('id', isEqualTo: FirebaseAuth.instance.currentUser!.uid).get().then((querySnapshot) {
-      CartItems.addAll(querySnapshot.docs);
+    FirebaseFirestore.instance
+        .collection('Cart')
+        .where('id', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .snapshots()
+        .listen((snapshot) {
+      CartItems = snapshot.docs;
       emit(GetCartDataSuccess());
-    }).catchError((error) {
+    }, onError: (error) {
+      print("Error getting cart data: $error");
       emit(GetCartDataError());
     });
   }
-  void addToCart(String title,String price,String description,String category,String imageUrl,String rating,String count) async{
-    CollectionReference Cart = FirebaseFirestore.instance.collection('Cart');
-        Cart
-          .add({
-        'title':title,
-        'price': price, // Stokes and Sons
-        'description': description, // 42
-        'category': category, // 42
-        'imageUrl': imageUrl, // 42
-        'rating': rating, // 42
-        'count': count, // 42
-          "id":FirebaseAuth.instance.currentUser!.uid
-      })
-          .then((value) => {
-        print("Cart item Added"),
-        emit(AddToCartSuccess())
-      })
-          .catchError((error) => print("Failed to add item: $error"));
+
+  Future<void> addToCart(String title, String price, String description,
+      String category, String imageUrl, String rating, String count) async {
+    try {
+      await FirebaseFirestore.instance.collection('Cart').add({
+        'title': title,
+        'price': price,
+        'description': description,
+        'category': category,
+        'imageUrl': imageUrl,
+        'rating': rating,
+        'count': count,
+        'id': FirebaseAuth.instance.currentUser!.uid,
+        'quantity': 1
+      });
+
+      emit(AddToCartSuccess());
+      // No need to call getCartData() here as we're using snapshots
+    } catch (error) {
+      print("Failed to add item: $error");
+      emit(AddToCartError());
+    }
   }
+
 
   void changeBottomNav(int index) {
     currentIndex = index;

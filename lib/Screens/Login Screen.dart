@@ -178,8 +178,11 @@ class _LoginPageState extends State<LoginPage> {
                                               builder: (context) =>
                                                   MainScreen()));
                                     } on FirebaseAuthException catch (e) {
+                                      setState(() {
+                                        isLoading = false;
+                                      });
                                       if (e.code ==
-                                          'The supplied auth credential is incorrect, malformed or has expired.') {
+                                          'user-not-found') {
                                         print('No user found for that email.');
                                       } else if (e.code == 'wrong-password') {
                                         print(

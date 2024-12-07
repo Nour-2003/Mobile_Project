@@ -129,7 +129,7 @@ class ProductDetails extends StatelessWidget {
                   ElevatedButton.icon(
                     onPressed: () {
                   ShopCubit.get(context).addToCart(title, price, description, category, imageUrl, rating, reviews);
-                    },
+                  },
                     icon: const Icon(Icons.shopping_cart),
                     label: const Text('Add to Cart'),
                     style: ElevatedButton.styleFrom(

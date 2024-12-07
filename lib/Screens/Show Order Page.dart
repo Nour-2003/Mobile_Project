@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mobileproject/Screens/Cart%20screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ShowOrderPage extends StatelessWidget {
-  final List<CartItem> orderItems;
+  final List<Map<String, dynamic>> orderItems;
   final double orderTotal;
 
   const ShowOrderPage({
@@ -11,7 +11,11 @@ class ShowOrderPage extends StatelessWidget {
     required this.orderTotal,
   }) : super(key: key);
 
-  Widget _buildOrderItem(CartItem item) {
+  Widget _buildOrderItem(Map<String, dynamic> item) {
+    final double price = (double.parse(item['price']) ?? 0);
+    final int quantity = (item['quantity'] ?? 1).toInt();
+    final double total = price * quantity;
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 16),
@@ -22,7 +26,7 @@ class ShowOrderPage extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
-                item.imageUrl,
+                item['imageUrl'] ?? '',
                 width: 80,
                 height: 80,
                 fit: BoxFit.cover,
@@ -42,7 +46,7 @@ class ShowOrderPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.name,
+                    item['title'] ?? '',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -50,7 +54,7 @@ class ShowOrderPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '\$${item.price.toStringAsFixed(2)}',
+                    '\$${price.toStringAsFixed(2)}',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 14,
@@ -58,14 +62,14 @@ class ShowOrderPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Quantity: ${item.quantity}',
+                    'Quantity: $quantity',
                     style: const TextStyle(
                       fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Subtotal: \$${item.total.toStringAsFixed(2)}',
+                    'Subtotal: \$${total.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -81,10 +85,50 @@ class ShowOrderPage extends StatelessWidget {
     );
   }
 
+  Future<void> _submitOrder(BuildContext context) async {
+    try {
+      final orderRef = FirebaseFirestore.instance.collection('Orders');
+
+      await orderRef.add({
+        'items': orderItems,
+        'total': orderTotal,
+        'status': 'pending',
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      // Clear the cart after successful order submission
+      final cartRef = FirebaseFirestore.instance.collection('Cart');
+      final batch = FirebaseFirestore.instance.batch();
+
+      for (var item in orderItems) {
+        if (item['id'] != null) {
+          final docRef = cartRef.doc(item['id']);
+          batch.delete(docRef);
+        }
+      }
+
+      await batch.commit();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Order submitted successfully!')),
+        );
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error submitting order: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
   Widget _buildSubmitSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
@@ -118,11 +162,7 @@ class ShowOrderPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Order submitted successfully!')),
-              );
-            },
+            onPressed: () => _submitOrder(context),
             style: ElevatedButton.styleFrom(
               minimumSize: const Size.fromHeight(50),
               foregroundColor: Colors.white,

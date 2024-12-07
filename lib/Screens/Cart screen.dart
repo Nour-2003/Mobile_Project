@@ -1,84 +1,17 @@
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobileproject/Cubit/Shop/Shop%20Cubit.dart';
-import 'package:mobileproject/Cubit/Shop/Shop%20States.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../Cubit/Shop/Shop Cubit.dart';
+import '../Cubit/Shop/Shop States.dart';
 import 'Show Order Page.dart';
-class CartItem {
-  final String id;
-  final String name;
-  final double price;
-  final String imageUrl;
-  int quantity;
 
-  CartItem({
-    required this.id,
-    required this.name,
-    required this.price,
-    required this.imageUrl,
-    this.quantity = 1,
-  });
 
-  double get total => price * quantity;
-}
-
-class CartPage extends StatefulWidget {
+class CartPage extends StatelessWidget {
   const CartPage({Key? key}) : super(key: key);
 
-  @override
-  State<CartPage> createState() => _CartPageState();
-}
+  Widget _buildCartItem(BuildContext context, DocumentSnapshot<Object?> item) {
+    final data = item.data() as Map<String, dynamic>? ?? {};
 
-class _CartPageState extends State<CartPage> {
-  final List<CartItem> _items = [
-    CartItem(
-      id: '1',
-      name: 'Wireless Earbuds',
-      price: 29.99,
-      imageUrl: 'https://picsum.photos/200/200?random=1',
-    ),
-    CartItem(
-      id: '2',
-      name: 'Smart Watch',
-      price: 39.99,
-      imageUrl: 'https://picsum.photos/200/200?random=2',
-    ),
-    CartItem(
-      id: '3',
-      name: 'Wireless Earbuds',
-      price: 29.99,
-      imageUrl: 'https://picsum.photos/200/200?random=1',
-    ),
-    CartItem(
-      id: '4',
-      name: 'Smart Watch',
-      price: 39.99,
-      imageUrl: 'https://picsum.photos/200/200?random=2',
-    ),
-    CartItem(
-      id: '5',
-      name: 'Wireless Earbuds',
-      price: 29.99,
-      imageUrl: 'https://picsum.photos/200/200?random=1',
-    ),
-  ];
-
-  double get total => _items.fold(0, (sum, item) => sum + item.total);
-
-  void _updateQuantity(String id, int change) {
-    setState(() {
-      final item = _items.firstWhere((item) => item.id == id);
-      item.quantity = (item.quantity + change).clamp(1, 99);
-    });
-  }
-
-  void _removeItem(String id) {
-    setState(() => _items.removeWhere((item) => item.id == id));
-  }
-
-  Widget _buildCartItem(CartItem item) {
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 16),
@@ -89,7 +22,7 @@ class _CartPageState extends State<CartPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
-                item.imageUrl,
+                data['imageUrl'] ?? '',
                 width: 80,
                 height: 80,
                 fit: BoxFit.cover,
@@ -109,7 +42,7 @@ class _CartPageState extends State<CartPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.name,
+                    data['title'] ?? '',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -117,7 +50,7 @@ class _CartPageState extends State<CartPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '\$${item.price.toStringAsFixed(2)}',
+                    '\$${data['price'] ?? '0.00'}',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 14,
@@ -135,19 +68,35 @@ class _CartPageState extends State<CartPage> {
                           children: [
                             IconButton(
                               icon: const Icon(Icons.remove, size: 16),
-                              onPressed: () => _updateQuantity(item.id, -1),
+                              onPressed: () {
+                                final currentQuantity = data['quantity'] ?? 1;
+                                if (currentQuantity > 1) {
+                                  FirebaseFirestore.instance
+                                      .collection('Cart')
+                                      .doc(item.id)
+                                      .update({'quantity': currentQuantity - 1});
+                                  ShopCubit.get(context).getCartData();
+                                }
+                              },
                               constraints: const BoxConstraints(
                                 minWidth: 32,
                                 minHeight: 32,
                               ),
                             ),
                             Text(
-                              '${item.quantity}',
+                              '${data['quantity'] ?? 1}',
                               style: const TextStyle(fontSize: 14),
                             ),
                             IconButton(
                               icon: const Icon(Icons.add, size: 16),
-                              onPressed: () => _updateQuantity(item.id, 1),
+                              onPressed: () {
+                                final currentQuantity = data['quantity'] ?? 1;
+                                FirebaseFirestore.instance
+                                    .collection('Cart')
+                                    .doc(item.id)
+                                    .update({'quantity': currentQuantity + 1});
+                                ShopCubit.get(context).getCartData();
+                              },
                               constraints: const BoxConstraints(
                                 minWidth: 32,
                                 minHeight: 32,
@@ -159,7 +108,13 @@ class _CartPageState extends State<CartPage> {
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.delete_outline),
-                        onPressed: () => _removeItem(item.id),
+                        onPressed: () {
+                          FirebaseFirestore.instance
+                              .collection('Cart')
+                              .doc(item.id)
+                              .delete();
+                          ShopCubit.get(context).getCartData();
+                        },
                         color: Colors.red[400],
                       ),
                     ],
@@ -173,10 +128,38 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  Widget _buildCheckoutSection() {
+  double _calculateTotal(List<DocumentSnapshot<Object?>> items) {
+    return items.fold<double>(
+      0,
+          (sum, item) {
+        final data = item.data() as Map<String, dynamic>? ?? {};
+        final price = (double.parse(data['price']) ?? 0);
+        final quantity = (data['quantity'] ?? 1).toInt();
+        return sum + (price * quantity);
+      },
+    );
+  }
+
+  List<Map<String, dynamic>> _prepareOrderItems(List<DocumentSnapshot<Object?>> items) {
+    return items.map((doc) {
+      final data = doc.data() as Map<String, dynamic>? ?? {};
+      return {
+        'id': doc.id,
+        'title': data['title'] ?? '',
+        'price': data['price'] ?? 0,
+        'quantity': data['quantity'] ?? 1,
+        'imageUrl': data['imageUrl'] ?? '',
+      };
+    }).toList();
+  }
+
+  Widget _buildCheckoutSection(BuildContext context, List<DocumentSnapshot<Object?>> items) {
+    final total = _calculateTotal(items);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
@@ -215,12 +198,11 @@ class _CartPageState extends State<CartPage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => ShowOrderPage(
-                    orderItems: _items, // Pass the cart items
-                    orderTotal: total,  // Pass the cart total
+                    orderItems: _prepareOrderItems(items),
+                    orderTotal: total,
                   ),
                 ),
               );
-
             },
             style: ElevatedButton.styleFrom(
               minimumSize: const Size.fromHeight(50),
@@ -244,19 +226,25 @@ class _CartPageState extends State<CartPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ShopCubit,ShopStates>(
-      listener: (context, state) {},
-        builder: (context,state){
+    return BlocConsumer<ShopCubit, ShopStates>(
+      listener: (context, state) {
+        // Handle state changes if needed
+      },
+      builder: (context, state) {
         var cubit = ShopCubit.get(context);
-        List items = cubit.CartItems;
-        print(items.length);
+        final items = cubit.CartItems.cast<DocumentSnapshot<Object?>>();
+
+        if (state is GetCartData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
         return Scaffold(
           appBar: AppBar(
             title: const Text('Shopping Cart'),
             elevation: 0,
             centerTitle: true,
           ),
-          body: _items.isEmpty
+          body: items.isEmpty
               ? const Center(
             child: Text(
               'Your cart is empty',
@@ -268,15 +256,15 @@ class _CartPageState extends State<CartPage> {
               Expanded(
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  itemCount: _items.length,
-                  itemBuilder: (context, index) => _buildCartItem(_items[index]),
+                  itemCount: items.length,
+                  itemBuilder: (context, index) => _buildCartItem(context, items[index]),
                 ),
               ),
-              _buildCheckoutSection(),
+              _buildCheckoutSection(context, items),
             ],
           ),
         );
-        }
+      },
     );
   }
 }

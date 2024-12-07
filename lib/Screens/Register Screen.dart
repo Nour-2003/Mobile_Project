@@ -235,6 +235,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     ),
                                   );
                                 } on FirebaseAuthException catch (e) {
+                                  setState(() {
+                                    isLoading = false;
+                                  });
                                   if (e.code == 'weak-password') {
                                     print('The password provided is too weak.');
                                     AwesomeDialog(
