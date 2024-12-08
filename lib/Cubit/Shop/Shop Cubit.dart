@@ -51,6 +51,13 @@ class ShopCubit extends Cubit<ShopStates> {
     }
   }
   int currentIndex = 0;
+  List<String> titles = [
+    'Home',
+    'Search',
+    'Cart',
+    'Admin Panel',
+    'Profile',
+  ];
   List<Widget> screens = [
     HomePage(),
     SearchScreen(),
@@ -120,7 +127,7 @@ class ShopCubit extends Cubit<ShopStates> {
   List filteredProducts = [];
   void loadProducts(List newProducts) {
     products = newProducts;
-    filteredProducts = List.from(products); // Initially show all products
+    filteredProducts = List.from(products);
     emit(ShopProductsLoadedState());
   }
 

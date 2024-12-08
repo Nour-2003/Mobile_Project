@@ -26,17 +26,17 @@ class ProfileScreen extends StatelessWidget {
       builder: (context, state) {
         print(ShopCubit.get(context).userData);
         return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              'Profile',
-              style: GoogleFonts.montserrat(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            centerTitle: true,
-            elevation: 0,
-          ),
+          // appBar: AppBar(
+          //   title: Text(
+          //     'Profile',
+          //     style: GoogleFonts.montserrat(
+          //       fontSize: 24,
+          //       fontWeight: FontWeight.bold,
+          //     ),
+          //   ),
+          //   centerTitle: true,
+          //   elevation: 0,
+          // ),
           body: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(20.0),

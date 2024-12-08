@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mobileproject/Cubit/Theme/Theme%20Cubit.dart';
 import '../Cubit/Shop/Shop Cubit.dart';
 import '../Cubit/Shop/Shop States.dart';
 import 'Show Order Page.dart';
@@ -159,15 +160,11 @@ class CartPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 10,
-            offset: const Offset(0, -1),
-          ),
-        ],
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+        color: ThemeCubit.get(context).themebool ? Colors.grey[800] : Colors.white,
       ),
       child: Column(
         children: [
@@ -206,7 +203,6 @@ class CartPage extends StatelessWidget {
             },
             style: ElevatedButton.styleFrom(
               minimumSize: const Size.fromHeight(50),
-              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -239,11 +235,11 @@ class CartPage extends StatelessWidget {
         }
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Shopping Cart'),
-            elevation: 0,
-            centerTitle: true,
-          ),
+          // appBar: AppBar(
+          //   title: const Text('Shopping Cart'),
+          //   elevation: 0,
+          //   centerTitle: true,
+          // ),
           body: items.isEmpty
               ? const Center(
             child: Text(

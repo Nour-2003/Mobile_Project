@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mobileproject/Cubit/Theme/Theme%20Cubit.dart';
 
 class ShowOrderPage extends StatelessWidget {
   final List<Map<String, dynamic>> orderItems;
@@ -126,18 +127,15 @@ class ShowOrderPage extends StatelessWidget {
 
   Widget _buildSubmitSection(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 10,
-            offset: const Offset(0, -1),
-          ),
-        ],
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+        color: ThemeCubit.get(context).themebool?Colors.grey[800]:Colors.white,
       ),
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           Row(

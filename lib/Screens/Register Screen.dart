@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:mobileproject/Screens/Main%20Screen.dart';
 import '../Cubit/Login/Login Cubit.dart';
 import '../Cubit/Login/Login States.dart';
+import '../Cubit/Theme/Theme Cubit.dart';
 import '../Shared/Constants.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -100,6 +101,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         const SizedBox(height: 20),
                         defaultTextFormField(
+                          isDark: ThemeCubit.get(context).themebool,
                           textController: nameController,
                           label: 'Name',
                           prefixIcon: Icon(Icons.person),
@@ -113,6 +115,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         const SizedBox(height: 15),
                         defaultTextFormField(
+                          isDark: ThemeCubit.get(context).themebool,
                           textController: emailController,
                           prefixIcon: Icon(Icons.email_outlined),
                           label: 'Email',
@@ -126,6 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         const SizedBox(height: 15),
                         defaultTextFormField(
+                          isDark: ThemeCubit.get(context).themebool,
                           onSubmit: (value) {},
                           textController: passwordController,
                           prefixIcon: Icon(Icons.lock),
@@ -151,6 +155,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         const SizedBox(height: 15),
                         defaultTextFormField(
+                          isDark: ThemeCubit.get(context).themebool,
                           onSubmit: (value) {},
                           textController: confirmController,
                           prefixIcon: Icon(Icons.lock),
@@ -179,6 +184,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         const SizedBox(height: 15),
                         defaultTextFormField(
+                          isDark: ThemeCubit.get(context).themebool,
                           textController: phoneController,
                           label: 'Phone',
                           prefixIcon: Icon(Icons.phone),

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobileproject/Cubit/Theme/Theme%20Cubit.dart';
 import 'package:mobileproject/Screens/Main%20Screen.dart';
 import 'package:mobileproject/Screens/Register%20Screen.dart';
 
@@ -66,6 +67,7 @@ class _LoginPageState extends State<LoginPage> {
                             height: 20,
                           ),
                           defaultTextFormField(
+                              isDark: ThemeCubit.get(context).themebool,
                               textController: emailController,
                               prefixIcon: Icon(Icons.email_outlined),
                               label: 'Email',
@@ -80,6 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                             height: 15,
                           ),
                           defaultTextFormField(
+                            isDark: ThemeCubit.get(context).themebool,
                               onSubmit: (value) {},
                               textController: passwordController,
                               prefixIcon: Icon(Icons.lock),

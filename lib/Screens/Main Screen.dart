@@ -17,6 +17,10 @@ class MainScreen extends StatelessWidget {
         builder: (context, state) {
           var cubit = ShopCubit.get(context);
           return  Scaffold(
+              appBar: AppBar(
+                centerTitle: true,
+                title: Text(cubit.titles[cubit.currentIndex]),
+              ),
               body: cubit.screens[cubit.currentIndex],
               bottomNavigationBar: BottomNavigationBar(
                 elevation: 10,
@@ -25,7 +29,7 @@ class MainScreen extends StatelessWidget {
                   BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
 
                   BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
-                  BottomNavigationBarItem(icon: Icon(Icons.add_shopping_cart), label: 'Add Product'),
+                  BottomNavigationBarItem(icon: Icon(Icons.admin_panel_settings), label: 'Admin Panel'),
                   BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
 
                 ],

@@ -15,10 +15,10 @@ ThemeData darkTheme = ThemeData(
     ),
   ),
   bottomNavigationBarTheme: BottomNavigationBarThemeData(
-    selectedItemColor: Color(0xFF00B96D),
-    unselectedItemColor: Colors.grey,
+    selectedItemColor: Colors.black,
+    unselectedItemColor: Colors.white,
     type: BottomNavigationBarType.fixed,
-    backgroundColor: Colors.white,
+    backgroundColor: Color(0xFF00B97D),
   ),
   appBarTheme: AppBarTheme(
     actionsIconTheme: IconThemeData(color: Colors.white),
@@ -95,18 +95,37 @@ ThemeData darkTheme = ThemeData(
     ),
   ),
   listTileTheme: ListTileThemeData(
-    iconColor: Colors.white, // White icon color
-    tileColor: Colors.grey.shade800, // Darker background for list items
-    textColor: Colors.white, // White text color
-    selectedTileColor: Color(0xFF00B96D), // Green for selected list items
-    contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Padding inside ListTile
+    iconColor: Colors.white,
+    tileColor: Colors.grey.shade800,
+    textColor: Colors.white,
+    selectedTileColor: Color(0xFF00B96D),
+    contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10.0), // Rounded corners
+      borderRadius: BorderRadius.circular(10.0),
     ),
+  ),
+  expansionTileTheme: ExpansionTileThemeData(
+    backgroundColor: Colors.grey.shade800,
+    collapsedBackgroundColor: HexColor("121212"),
+    textColor: Colors.white,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10.0),
+    ),
+    iconColor: Colors.white,
+    collapsedTextColor: Colors.white,
+    collapsedIconColor: Colors.white,
   ),
 );
 
 ThemeData lightTheme = ThemeData(
+  expansionTileTheme: ExpansionTileThemeData(
+    backgroundColor: Colors.white,
+    collapsedBackgroundColor: Colors.white,
+    textColor: Colors.black,
+    iconColor: Colors.black,
+    collapsedTextColor: Colors.black,
+    collapsedIconColor: Colors.black,
+  ),
   iconTheme: IconThemeData(color: Colors.black),
   primarySwatch: Colors.blue,
   scaffoldBackgroundColor: Colors.white,
@@ -193,13 +212,13 @@ ThemeData lightTheme = ThemeData(
     ),
   ),
   listTileTheme: ListTileThemeData(
-    iconColor: Colors.black, // Black icon color for light theme
-    tileColor: Colors.white, // White background for list items
-    textColor: Colors.black, // Black text color
-    selectedTileColor: Color(0xFF00B96D), // Green for selected list items
-    contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Padding inside ListTile
+    iconColor: Colors.black,
+    tileColor: Colors.white,
+    textColor: Colors.black,
+    selectedTileColor: Color(0xFF00B96D),
+    contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10.0), // Rounded corners
+      borderRadius: BorderRadius.circular(10.0),
     ),
   ),
 );

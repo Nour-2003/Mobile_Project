@@ -41,10 +41,6 @@ class HomePage extends StatelessWidget {
           print("Fire Base Data Here " + Data.length.toString());
           categories = ShopCubit.get(context).firebaseCategories;
           return Scaffold(
-            appBar: AppBar(
-              title: Text('Home Page'),
-              centerTitle: true,
-            ),
             body: SingleChildScrollView(
               scrollDirection: Axis.vertical,
               child: Padding(

@@ -110,6 +110,7 @@ bool themebool = false;
 //   );
 // }
 Widget defaultTextFormField({
+  required bool isDark,
   required TextEditingController textController,
   required String label,
   required TextInputType type,
@@ -123,6 +124,7 @@ Widget defaultTextFormField({
   bool obscureText = false, // Default value set to false
 }) =>
     TextFormField(
+      style: TextStyle(color: isDark ? Colors.white: Colors.black),
       controller: textController,
       onChanged: onChange as void Function(String)?,
       onTap: ontap as void Function()?, // Assuming onTap takes no arguments
