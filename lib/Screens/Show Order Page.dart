@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobileproject/Cubit/Theme/Theme%20Cubit.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class ShowOrderPage extends StatelessWidget {
   final List<Map<String, dynamic>> orderItems;
   final double orderTotal;
+  double? finalRating;
 
-  const ShowOrderPage({
+  ShowOrderPage({
     Key? key,
     required this.orderItems,
     required this.orderTotal,
@@ -48,15 +51,17 @@ class ShowOrderPage extends StatelessWidget {
                 children: [
                   Text(
                     item['title'] ?? '',
-                    style: const TextStyle(
-                      fontSize: 16,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.montserrat(
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '\$${price.toStringAsFixed(2)}',
-                    style: TextStyle(
+                    style: GoogleFonts.montserrat(
                       color: Colors.grey[600],
                       fontSize: 14,
                     ),
@@ -64,14 +69,14 @@ class ShowOrderPage extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     'Quantity: $quantity',
-                    style: const TextStyle(
+                    style: GoogleFonts.montserrat(
                       fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Subtotal: \$${total.toStringAsFixed(2)}',
-                    style: const TextStyle(
+                    style: GoogleFonts.montserrat(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Colors.blue,
@@ -89,15 +94,49 @@ class ShowOrderPage extends StatelessWidget {
   Future<void> _submitOrder(BuildContext context) async {
     try {
       final orderRef = FirebaseFirestore.instance.collection('Orders');
-
-      await orderRef.add({
+      final newOrder = await orderRef.add({
         'items': orderItems,
-        'total': orderTotal,
+        'total': orderTotal.toStringAsFixed(2),
         'status': 'pending',
+        'rating': 0,
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      // Clear the cart after successful order submission
+      // Add the generated order ID to each item for reference
+      for (var item in orderItems) {
+        item['orderId'] = newOrder.id;
+      }
+      print("Order added with ID: ${newOrder.id}");
+
+      final inventoryRef = FirebaseFirestore.instance.collection('Inventory');
+
+      for (var item in orderItems) {
+        final itemName = item['title'];
+        final orderQuantity = item['quantity'];
+        print("Processing item: $itemName, Quantity: $orderQuantity");
+
+        // Search for the item in the inventory
+        final querySnapshot = await inventoryRef.where('name', isEqualTo: itemName).get();
+        if (querySnapshot.docs.isNotEmpty) {
+          print("Item exists in inventory. Updating quantity.");
+          // Item exists, update its quantity
+          final docRef = querySnapshot.docs.first.reference;
+          await docRef.update({
+            'quantity': FieldValue.increment(orderQuantity),
+          });
+          print("Updated inventory for $itemName with quantity -$orderQuantity");
+        } else {
+          print("Item does not exist in inventory. Adding new item.");
+          // Item does not exist, add a new document
+          await inventoryRef.add({
+            'name': itemName,
+            'quantity': orderQuantity, // Start with the negative quantity for the order
+          });
+          print("Added new inventory item: $itemName with quantity -$orderQuantity");
+        }
+      }
+
+      // Manage Cart updates
       final cartRef = FirebaseFirestore.instance.collection('Cart');
       final batch = FirebaseFirestore.instance.batch();
 
@@ -109,12 +148,12 @@ class ShowOrderPage extends StatelessWidget {
       }
 
       await batch.commit();
+      print("Cart updates committed.");
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Order submitted successfully!')),
         );
-        Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e) {
       if (context.mounted) {
@@ -125,15 +164,90 @@ class ShowOrderPage extends StatelessWidget {
     }
   }
 
+
+
+  Future<void> _submitRating(BuildContext context) async {
+    double? userRating;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Rate Your Order'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('How would you rate your order experience?'),
+              const SizedBox(height: 16),
+              RatingBar.builder(
+                initialRating: 0,
+                minRating: 1,
+                direction: Axis.horizontal,
+                allowHalfRating: true,
+                itemCount: 5,
+                itemBuilder: (context, _) => const Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                onRatingUpdate: (rating) {
+                  userRating = rating;
+                  finalRating = rating;
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (userRating != null) {
+                  try {
+                    // Ensure the order has a unique ID, provided in the order data
+                    final String orderId = orderItems.isNotEmpty ? orderItems[0]['orderId'] ?? '' : '';
+
+                    if (orderId.isNotEmpty) {
+                      final orderRef = FirebaseFirestore.instance.collection('Orders').doc(orderId);
+
+                      // Update the rating field for the specific order
+                      await orderRef.update({'rating': userRating});
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Rating submitted successfully!')),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Order ID not found!')),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error submitting rating: ${e.toString()}')),
+                    );
+                  }
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildSubmitSection(BuildContext context) {
     return Container(
-
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(16),
           topRight: Radius.circular(16),
         ),
-        color: ThemeCubit.get(context).themebool?Colors.grey[800]:Colors.white,
+        color: ThemeCubit.get(context).themebool ? Colors.grey[800] : Colors.white,
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -141,16 +255,16 @@ class ShowOrderPage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Total:',
-                style: TextStyle(
+                style: GoogleFonts.montserrat(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
                 '\$${orderTotal.toStringAsFixed(2)}',
-                style: const TextStyle(
+                style: GoogleFonts.montserrat(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.blue,
@@ -168,9 +282,27 @@ class ShowOrderPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text(
+            child: Text(
               'Submit Order',
-              style: TextStyle(
+              style: GoogleFonts.montserrat(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => _submitRating(context),
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size.fromHeight(50),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'Rate Order',
+              style: GoogleFonts.montserrat(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),

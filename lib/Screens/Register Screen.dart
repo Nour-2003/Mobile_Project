@@ -234,7 +234,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     password: passwordController.text,
                                   );
                                   addUser();
-                                  Navigator.push(
+                                  Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => MainScreen(),
@@ -263,6 +263,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       title: 'Dialog Title',
                                       desc:
                                       'The account already exists for that email.',
+                                    )..show();
+                                  }
+                                  else if(e.code == 'invalid-email'){
+                                    AwesomeDialog(
+                                      context: context,
+                                      dialogType: DialogType.error,
+                                      animType: AnimType.rightSlide,
+                                      title: 'Sign up Error',
+                                      desc: 'Wrong Email Format',
                                     )..show();
                                   }
                                 } catch (e) {

@@ -169,6 +169,7 @@ class _LoginPageState extends State<LoginPage> {
                                      setState(() {
                                        isLoading = true;
                                      });
+
                                       final credential = await FirebaseAuth
                                           .instance
                                           .signInWithEmailAndPassword(
@@ -184,13 +185,13 @@ class _LoginPageState extends State<LoginPage> {
                                       setState(() {
                                         isLoading = false;
                                       });
-                                      if (e.code ==
-                                          'user-not-found') {
-                                        print('No user found for that email.');
-                                      } else if (e.code == 'wrong-password') {
-                                        print(
-                                            'Wrong password provided for that user.');
-                                      }
+                                      AwesomeDialog(
+                                        context: context,
+                                        dialogType: DialogType.error,
+                                        animType: AnimType.rightSlide,
+                                        title: 'Login Error',
+                                        desc: 'The supplied auth credential is incorrect, malformed or has expired',
+                                      )..show();
                                     }
                                   }
                                 },

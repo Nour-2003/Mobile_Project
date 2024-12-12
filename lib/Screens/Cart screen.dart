@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobileproject/Cubit/Theme/Theme%20Cubit.dart';
 import '../Cubit/Shop/Shop Cubit.dart';
 import '../Cubit/Shop/Shop States.dart';
@@ -241,10 +242,10 @@ class CartPage extends StatelessWidget {
           //   centerTitle: true,
           // ),
           body: items.isEmpty
-              ? const Center(
+              ? Center(
             child: Text(
-              'Your cart is empty',
-              style: TextStyle(fontSize: 18),
+              'Your cart is Empty',
+              style: GoogleFonts.montserrat(fontSize: 18,),
             ),
           )
               : Column(

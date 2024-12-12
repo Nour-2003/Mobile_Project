@@ -1,7 +1,9 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobileproject/Cubit/Shop/Shop%20Cubit.dart';
 import 'package:mobileproject/Cubit/Shop/Shop%20States.dart';
@@ -26,7 +28,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   String? _selectedCategory;
   List<String> categories = [];
-  CollectionReference Products = FirebaseFirestore.instance.collection('Products');
+  CollectionReference Products =
+      FirebaseFirestore.instance.collection('Products');
+  CollectionReference inventoryRef =
+      FirebaseFirestore.instance.collection('Inventory');
 
   Future<void> addUser() {
     return Products.add({
@@ -37,14 +42,18 @@ class _AddProductScreenState extends State<AddProductScreen> {
       'imageUrl': _imageUrlController.text,
       'rating': _ratingController.text,
       'count': _countController.text,
-    }).then((value) => {}).catchError((error) => print("Failed to add product: $error"));
+    })
+        .then((value) => {})
+        .catchError((error) => print("Failed to add product: $error"));
   }
 
   void getCategories() async {
     try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Categories').get();
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('Categories').get();
       setState(() {
-        categories = querySnapshot.docs.map((doc) => doc['name'] as String).toList();
+        categories =
+            querySnapshot.docs.map((doc) => doc['name'] as String).toList();
       });
     } catch (error) {
       print('Error fetching categories: $error');
@@ -72,10 +81,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 children: [
                   // Add Product Section
                   ExpansionTile(
-                    title: Text('Add Product', style: GoogleFonts.montserrat(fontSize: 18, fontWeight: FontWeight.bold),),
+                    title: Text(
+                      'Add Product',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
                     children: [
                       Form(
-                        key: _formKey1,  // Use _formKey1 here
+                        key: _formKey1, // Use _formKey1 here
                         child: SingleChildScrollView(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -144,9 +157,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   value: _selectedCategory,
                                   items: categories
                                       .map((category) => DropdownMenuItem(
-                                    value: category,
-                                    child: Text(category),
-                                  ))
+                                            value: category,
+                                            child: Text(category),
+                                          ))
                                       .toList(),
                                   onChanged: (value) {
                                     setState(() {
@@ -223,7 +236,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   width: double.infinity,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      if (_formKey1.currentState?.validate() ?? false) {
+                                      if (_formKey1.currentState?.validate() ??
+                                          false) {
                                         addUser().then((value) {
                                           AwesomeDialog(
                                             context: context,
@@ -254,12 +268,18 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   ),
                   // Add Category Section
 
-                  SizedBox(height: 10,),
+                  SizedBox(
+                    height: 10,
+                  ),
                   ExpansionTile(
-                    title: Text('Add Category',  style: GoogleFonts.montserrat(fontSize: 18, fontWeight: FontWeight.bold),),
+                    title: Text(
+                      'Add Category',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
                     children: [
                       Form(
-                        key: _formKey2,  // Use _formKey2 here
+                        key: _formKey2, // Use _formKey2 here
                         child: SingleChildScrollView(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -302,7 +322,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   width: double.infinity,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      if (_formKey2.currentState?.validate() ?? false) {
+                                      if (_formKey2.currentState?.validate() ??
+                                          false) {
                                         FirebaseFirestore.instance
                                             .collection('Categories')
                                             .add({
@@ -333,27 +354,36 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     ],
                   ),
                   // Get Orders Section
-                  SizedBox(height: 10,),
+                  SizedBox(
+                    height: 10,
+                  ),
                   ExpansionTile(
                     title: Text(
                       'Get Orders',
-                      style: GoogleFonts.montserrat(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: GoogleFonts.montserrat(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     children: [
                       StreamBuilder<QuerySnapshot>(
-                        stream: FirebaseFirestore.instance.collection('Orders').snapshots(),
+                        stream: FirebaseFirestore.instance
+                            .collection('Orders')
+                            .snapshots(),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             return Center(child: CircularProgressIndicator());
                           }
                           if (snapshot.hasError) {
-                            return Center(child: Text('Error fetching orders.'));
+                            return Center(
+                                child: Text('Error fetching orders.'));
                           }
-                          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          if (!snapshot.hasData ||
+                              snapshot.data!.docs.isEmpty) {
                             return Center(
                               child: Text(
                                 'No orders found.',
-                                style: TextStyle(fontSize: 16, color: Colors.grey),
+                                style:
+                                    TextStyle(fontSize: 16, color: Colors.grey),
                               ),
                             );
                           }
@@ -362,7 +392,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
                           return ListView.builder(
                             shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
+                            physics: const NeverScrollableScrollPhysics(),
                             itemCount: orders.length,
                             itemBuilder: (context, index) {
                               final order = orders[index];
@@ -370,101 +400,203 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               final status = order['status'];
                               final total = order['total'];
                               final timestamp = order['timestamp'];
+                              final rating = order['rating'] ??
+                                  0; // Default to 0 if rating is null
 
-                              return Card(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: ExpansionTile(
-                                    tilePadding: EdgeInsets.zero,
-                                    title: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Order ID: ${order.id.substring(0, 8)}...',
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        Chip(
-                                          label: Text(
-                                            status,
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          backgroundColor: status == 'pending'
-                                              ? Colors.orange
-                                              : Colors.green,
-                                        ),
-                                      ],
-                                    ),
-                                    subtitle: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(height: 8),
-                                        Text(
-                                          'Total: \$${total.toString()}',
-                                          style: TextStyle(fontSize: 14),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          'Date: ${timestamp.toDate()}',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    children: [
-                                      Divider(),
-                                      ListView.builder(
-                                        shrinkWrap: true,
-                                        physics: NeverScrollableScrollPhysics(),
-                                        itemCount: items.length,
-                                        itemBuilder: (context, itemIndex) {
-                                          final item = items[itemIndex];
-                                          return ListTile(
-                                            contentPadding: const EdgeInsets.symmetric(
-                                                vertical: 8, horizontal: 8),
-                                            leading: ClipRRect(
-                                              borderRadius: BorderRadius.circular(8),
-                                              child: Image.network(
-                                                item['imageUrl'],
-                                                width: 60,
-                                                height: 60,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                            title: Text(
-                                              item['title'],
+                              return AnimatedContainer(
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeInOut,
+                                margin: const EdgeInsets.symmetric(
+                                    vertical: 8, horizontal: 16),
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: ExpansionTile(
+                                      tilePadding: EdgeInsets.zero,
+                                      title: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              'Order ID: ${order.id.substring(0, 8)}...',
                                               style: GoogleFonts.montserrat(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                            subtitle: Text(
-                                              'Quantity: ${item['quantity']} | Price: \$${item['price']}',
-                                              style: TextStyle(fontSize: 12, color: Colors.grey),
-                                            ),
-                                            trailing: Text(
-                                              'Subtotal: \$${(double.parse(item['price']) * item['quantity']).toStringAsFixed(2)}',
-                                              style: TextStyle(
+                                          ),
+                                          Chip(
+                                            label: Text(
+                                              status,
+                                              style: GoogleFonts.montserrat(
                                                 fontSize: 12,
-                                                color: Colors.green,
+                                                color: Colors.white,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                          );
-                                        },
+                                            backgroundColor: status == 'pending'
+                                                ? Colors.orange
+                                                : Colors.green,
+                                          ),
+                                        ],
                                       ),
-                                    ],
+                                      subtitle: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                'Total:',
+                                                style: GoogleFonts.montserrat(
+                                                    fontSize: 14),
+                                              ),
+                                              Text(
+                                                '  \$${total.toString()}',
+                                                style: GoogleFonts.montserrat(
+                                                    fontSize: 14,
+                                                    color: Colors.blue),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Date: ${timestamp.toDate()}',
+                                            style: GoogleFonts.montserrat(
+                                              fontSize: 12,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                'Rating:',
+                                                style: GoogleFonts.montserrat(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              RatingBarIndicator(
+                                                rating: rating.toDouble(),
+                                                itemBuilder: (context, _) =>
+                                                    const Icon(
+                                                  Icons.star,
+                                                  color: Colors.amber,
+                                                ),
+                                                itemCount: 5,
+                                                itemSize: 20.0,
+                                                direction: Axis.horizontal,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      children: [
+                                        const Divider(),
+                                        ListView.builder(
+                                          shrinkWrap: true,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          itemCount: items.length,
+                                          itemBuilder: (context, itemIndex) {
+                                            final item = items[itemIndex];
+                                            return AnimatedPadding(
+                                              duration: const Duration(
+                                                  milliseconds: 300),
+                                              curve: Curves.easeInOut,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 4.0),
+                                              child: ListTile(
+                                                contentPadding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 8),
+                                                leading: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  child: Image.network(
+                                                    item['imageUrl'],
+                                                    width: 80,
+                                                    // Slightly increased for better visibility
+                                                    height: 80,
+                                                    fit: BoxFit.fitHeight,
+                                                    errorBuilder: (context,
+                                                            error,
+                                                            stackTrace) =>
+                                                        Container(
+                                                      width: 80,
+                                                      height: 80,
+                                                      color: Colors.grey,
+                                                      // Placeholder color when image fails to load
+                                                      child: const Icon(
+                                                          Icons.error,
+                                                          color: Colors.white),
+                                                    ),
+                                                  ),
+                                                ),
+                                                title: Text(
+                                                  item['title'],
+                                                  maxLines: 2,
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                                subtitle: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Quantity: ${item['quantity']}',
+                                                      style: const TextStyle(
+                                                          fontSize: 12,
+                                                          color: Colors.grey),
+                                                      maxLines: 1,
+                                                      // Limit subtitle to 1 line
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                    const SizedBox(height: 2),
+                                                    Text(
+                                                      'Price: \$${item['price']}',
+                                                      style: const TextStyle(
+                                                          fontSize: 12,
+                                                          color: Colors.grey),
+                                                      maxLines: 1,
+                                                      // Limit subtitle to 1 line
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                    const SizedBox(height: 2),
+                                                    Text(
+                                                      'Subtotal: \$${(double.parse(item['price']) * item['quantity']).toStringAsFixed(2)}',
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.green,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );
@@ -474,7 +606,118 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       ),
                     ],
                   ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  ExpansionTile(
+                    title: Text(
+                      'Best Selling Products',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    children: [
+                      StreamBuilder<QuerySnapshot>(
+                        stream: inventoryRef.snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                          if (snapshot.hasError) {
+                            return Center(child: Text('Error fetching inventory data.'));
+                          }
+                          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                            return Center(
+                              child: Text(
+                                'No inventory data found.',
+                                style: TextStyle(fontSize: 16, color: Colors.grey),
+                              ),
+                            );
+                          }
 
+                          final inventoryItems = snapshot.data!.docs;
+
+                          // Map to store the quantity of each product
+                          Map<String, double> quantityMap = {};
+
+                          for (var doc in inventoryItems) {
+                            var data = doc.data() as Map<String, dynamic>;
+                            var productName = data['name'];
+                            var quantity = double.tryParse(data['quantity'].toString()) ?? 0.0;
+
+                            if (quantity > 0) {
+                              quantityMap[productName] = quantity;
+                            }
+                          }
+
+                          // Convert to sorted list
+                          List<MapEntry<String, double>> sortedList = quantityMap.entries.toList()
+                            ..sort((a, b) => b.value.compareTo(a.value));
+
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 3, // Adjusted flex to fit better
+                                  child: AspectRatio(
+                                    aspectRatio: 0.8, // Smaller aspect ratio for a smaller chart
+                                    child: PieChart(
+                                      PieChartData(
+                                        sectionsSpace: 3,
+                                        borderData: FlBorderData(show: false),
+                                        sections: sortedList.take(5).map((entry) {
+                                          double percentage = (entry.value / quantityMap.values.fold(0.0, (sum, quantity) => sum + quantity)) * 100;
+                                          return PieChartSectionData(
+                                            value: entry.value,
+                                            title: '${percentage.toStringAsFixed(1)}%',
+                                            color: Colors.primaries[sortedList.indexOf(entry) % Colors.primaries.length],
+                                            radius: 50,
+                                            titleStyle: GoogleFonts.montserrat(
+                                              fontSize: 12,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 20),
+                                Expanded(
+                                  flex: 3,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: sortedList.take(5).map((entry) {
+                                      return Row(
+                                        children: [
+                                          Container(
+                                            width: 20,
+                                            height: 20,
+                                            color: Colors.primaries[sortedList.indexOf(entry) % Colors.primaries.length],
+                                          ),
+                                          SizedBox(width: 8),
+                                          Flexible(
+                                            child: Text(
+                                              '${entry.key} (${(entry.value / quantityMap.values.fold(0.0, (sum, quantity) => sum + quantity) * 100).toStringAsFixed(1)}%)',
+                                              style: GoogleFonts.montserrat(fontSize: 16, fontWeight: FontWeight.bold),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              softWrap: false,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  )
 
                 ],
               ),

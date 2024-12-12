@@ -1,3 +1,4 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobileproject/Cubit/Shop/Shop%20Cubit.dart';
@@ -128,7 +129,15 @@ class ProductDetails extends StatelessWidget {
                 children: [
                   ElevatedButton.icon(
                     onPressed: () {
-                  ShopCubit.get(context).addToCart(title, price, description, category, imageUrl, rating, reviews);
+                  ShopCubit.get(context).addToCart(title, price, description, category, imageUrl, rating, reviews).then((value) {
+                    AwesomeDialog(
+                      context: context,
+                      dialogType: DialogType.success,
+                      animType: AnimType.bottomSlide,
+                      title: 'Success',
+                      desc: 'Product added to cart successfully',
+                    )..show();
+                  });
                   },
                     icon: const Icon(Icons.shopping_cart),
                     label: const Text('Add to Cart'),
