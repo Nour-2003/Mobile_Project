@@ -1,4 +1,3 @@
-# E-commerce Application
 # E-commerce Mobile Application  
 
 ## Project Overview  
