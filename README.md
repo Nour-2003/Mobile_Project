@@ -9,6 +9,7 @@ This project is a feature-rich e-commerce mobile application powered by Firebase
 - **Shopping Cart**: Add/remove/edit product quantities and view order total before checkout.  
 - **Personalization**: Define the birthdate using a calendar widget.  
 - **Order Feedback**: Submit feedback and ratings for orders.  
+- **Dark Mode**: Toggle between light and dark modes for an enhanced user experience.  
 
 ### Admin Features  
 - **Product Management**: Add, edit, or delete products and categories with stock tracking.  
@@ -18,6 +19,6 @@ This project is a feature-rich e-commerce mobile application powered by Firebase
 
 ### Technology Stack  
 - **Database**: Firebase for real-time data synchronization and backend management.  
+- **UI/UX**: Dark mode implementation for improved accessibility and user comfort.  
 
 This app delivers a seamless shopping experience for customers and robust tools for administrators.
-
