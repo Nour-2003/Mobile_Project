@@ -4,9 +4,6 @@ abstract class ShopStates{
 class ShopInitialState extends ShopStates{}
 class ShopChangeBottomNavState extends ShopStates{}
 
-class ShopLoadingHomeDataState extends ShopStates{}
-class ShopSuccessHomeDataState extends ShopStates{}
-class ShopErrorHomeDataState extends ShopStates{}
 
 class ShopSearchState extends ShopStates{}
 class ShopSearchLoadingState extends ShopStates{}
@@ -17,6 +14,11 @@ class ShopSuccessCatProductsDataState extends ShopStates{}
 class ShopErrorCatProductsDataState extends ShopStates{}
 
 class GetFirebaseDataState extends ShopStates{}
+class GetFirebaseDataLoadingState extends ShopStates{}
+class GetFirebaseDataErrorState extends ShopStates{
+  String error;
+  GetFirebaseDataErrorState(this.error);
+}
 class UserLoading extends ShopStates {}
 
 // Success state with user data
@@ -52,3 +54,10 @@ class AddToCartError extends ShopStates{}
 class GetCartData extends ShopStates{}
 class GetCartDataSuccess extends ShopStates{}
 class GetCartDataError extends ShopStates{}
+
+class ProductUpdatedSuccessState extends ShopStates{}
+class ProductUpdatedErrorState extends ShopStates{
+  String error;
+  ProductUpdatedErrorState(this.error);
+}
+class ProductsUpdatedState extends ShopStates{}

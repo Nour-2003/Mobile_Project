@@ -1,3 +1,4 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -151,15 +152,59 @@ class ShowOrderPage extends StatelessWidget {
       print("Cart updates committed.");
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Order submitted successfully!')),
-        );
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.success,
+        animType: AnimType.bottomSlide,
+        title: 'Order Submitted',
+        btnOkOnPress: () {},
+        desc: 'Your order has been submitted successfully!',
+        titleTextStyle: GoogleFonts
+            .montserrat(
+          fontSize: 20,
+          fontWeight:
+          FontWeight
+              .bold,
+          color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+        ),
+        descTextStyle:GoogleFonts
+            .montserrat(
+          fontSize: 17,
+          fontWeight:
+          FontWeight
+              .bold,
+          color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+        ) ,
+        dialogBackgroundColor: ThemeCubit.get(context).themebool ? Colors.grey[800]:Colors.white,
+      ).show();
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error submitting order: ${e.toString()}')),
-        );
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        animType: AnimType.bottomSlide,
+        title: 'Error',
+        btnOkOnPress: () {},
+        desc: '$e',
+        titleTextStyle: GoogleFonts
+            .montserrat(
+          fontSize: 20,
+          fontWeight:
+          FontWeight
+              .bold,
+          color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+        ),
+        descTextStyle:GoogleFonts
+            .montserrat(
+          fontSize: 17,
+          fontWeight:
+          FontWeight
+              .bold,
+          color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+        ) ,
+        dialogBackgroundColor: ThemeCubit.get(context).themebool ? Colors.grey[800]:Colors.white,
+      ).show();
       }
     }
   }
@@ -173,7 +218,10 @@ class ShowOrderPage extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Rate Your Order'),
+          backgroundColor: ThemeCubit.get(context).themebool ? Colors.grey[800]:Colors.white,
+          title:Text('Rate Your Order',style: GoogleFonts.montserrat(
+            color: ThemeCubit.get(context).themebool ?Colors.white:Colors.black
+          ),),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -205,35 +253,135 @@ class ShowOrderPage extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                if (userRating != null) {
-                  try {
-                    // Ensure the order has a unique ID, provided in the order data
-                    final String orderId = orderItems.isNotEmpty ? orderItems[0]['orderId'] ?? '' : '';
+                if (userRating == null) {
+                  AwesomeDialog(
+                    context: context,
+                    dialogType: DialogType.warning,
+                    animType: AnimType.bottomSlide,
+                    title: 'No Rating Provided',
+                    desc: 'Please provide a rating before submitting.',
+                    btnOkOnPress: () {},
+                    titleTextStyle: GoogleFonts
+                        .montserrat(
+                      fontSize: 20,
+                      fontWeight:
+                      FontWeight
+                          .bold,
+                      color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                    ),
+                    descTextStyle:GoogleFonts
+                        .montserrat(
+                      fontSize: 17,
+                      fontWeight:
+                      FontWeight
+                          .bold,
+                      color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                    ) ,
+                    dialogBackgroundColor: ThemeCubit.get(context).themebool ? Colors.grey[800]:Colors.white,
+                  ).show();
+                  return;
+                }
 
-                    if (orderId.isNotEmpty) {
-                      final orderRef = FirebaseFirestore.instance.collection('Orders').doc(orderId);
-
-                      // Update the rating field for the specific order
-                      await orderRef.update({'rating': userRating});
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Rating submitted successfully!')),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Order ID not found!')),
-                      );
-                    }
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error submitting rating: ${e.toString()}')),
-                    );
+                try {
+                  // Check if order items are available
+                  if (orderItems.isEmpty || orderItems[0]['orderId'] == null) {
+                    AwesomeDialog(
+                      context: context,
+                      dialogType: DialogType.error,
+                      animType: AnimType.bottomSlide,
+                      title: 'Error',
+                      desc: 'Order ID not found. Please try again.',
+                      btnOkOnPress: () {},
+                      titleTextStyle: GoogleFonts
+                          .montserrat(
+                        fontSize: 20,
+                        fontWeight:
+                        FontWeight
+                            .bold,
+                        color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                      ),
+                      descTextStyle:GoogleFonts
+                          .montserrat(
+                        fontSize: 17,
+                        fontWeight:
+                        FontWeight
+                            .bold,
+                        color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                      ) ,
+                      dialogBackgroundColor: ThemeCubit.get(context).themebool ? Colors.grey[800]:Colors.white,
+                    ).show();
+                    return;
                   }
-                  Navigator.of(context).pop();
+
+                  final String orderId = orderItems[0]['orderId'];
+
+                  // Reference to the specific order document in Firestore
+                  final orderRef = FirebaseFirestore.instance.collection('Orders').doc(orderId);
+
+                  // Update the rating field for the specific order
+                  await orderRef.update({'rating': userRating});
+
+                  // Show success dialog
+                  AwesomeDialog(
+                    context: context,
+                    dialogType: DialogType.success,
+                    animType: AnimType.bottomSlide,
+                    title: 'Rating Submitted',
+                    desc: 'Thank you for rating your order!',
+                    titleTextStyle: GoogleFonts
+                        .montserrat(
+                      fontSize: 20,
+                      fontWeight:
+                      FontWeight
+                          .bold,
+                      color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                    ),
+                    descTextStyle:GoogleFonts
+                        .montserrat(
+                      fontSize: 17,
+                      fontWeight:
+                      FontWeight
+                          .bold,
+                      color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                    ) ,
+                    dialogBackgroundColor: ThemeCubit.get(context).themebool ? Colors.grey[800]:Colors.white,
+                    btnOkOnPress: () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    },
+                  ).show();
+                } catch (e) {
+                  // Handle Firestore update errors
+                  AwesomeDialog(
+                    context: context,
+                    dialogType: DialogType.error,
+                    animType: AnimType.bottomSlide,
+                    title: 'Error',
+                    titleTextStyle: GoogleFonts
+                        .montserrat(
+                      fontSize: 20,
+                      fontWeight:
+                      FontWeight
+                          .bold,
+                      color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                    ),
+                    descTextStyle:GoogleFonts
+                        .montserrat(
+                      fontSize: 17,
+                      fontWeight:
+                      FontWeight
+                          .bold,
+                      color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                    ) ,
+                    dialogBackgroundColor: ThemeCubit.get(context).themebool ? Colors.grey[800]:Colors.white,
+                    desc: 'An error occurred while submitting your rating. Please try again.\n\nError: $e',
+                    btnOkOnPress: () {},
+                  ).show();
                 }
               },
               child: const Text('Submit'),
-            ),
+            )
+
           ],
         );
       },

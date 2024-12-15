@@ -13,9 +13,9 @@ import '../Cubit/Theme/Theme Cubit.dart';
 import '../Cubit/Theme/Theme States.dart';
 
 class ProfileScreen extends StatelessWidget {
-  final String name = "Nour Eldin Hesham";
-  final String email = "noureldean@gmail.com";
-  final String phone = "01203299971";
+  // final String name = "Nour Eldin Hesham";
+  // final String email = "noureldean@gmail.com";
+  // final String phone = "01203299971";
 
 
   @override
@@ -61,12 +61,12 @@ class ProfileScreen extends StatelessWidget {
                       ],
                     ),
                     child: ClipOval(
-                      child: Image.network(
-                        "https://media.istockphoto.com/id/1087531642/vector/male-face-silhouette-or-icon-man-avatar-profile-unknown-or-anonymous-person-vector.jpg?s=612x612&w=0&k=20&c=FEppaMMfyIYV2HJ6Ty8tLmPL1GX6Tz9u9Y8SCRrkD-o=",
-                        height: 120,
-                        width: 120,
+                      child: Image.asset(
+                        'Images/Profile.jpg',
+                        width: 150,
+                        height: 150,
                         fit: BoxFit.cover,
-                      ),
+                      )
                     ),
                   ),
                   const SizedBox(height: 20),

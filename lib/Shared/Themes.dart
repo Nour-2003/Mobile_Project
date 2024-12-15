@@ -1,3 +1,4 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -222,3 +223,67 @@ ThemeData lightTheme = ThemeData(
     ),
   ),
 );
+AwesomeDialog buildDarkThemeDialog(BuildContext context) {
+  return AwesomeDialog(
+    context: context,
+    dialogType: DialogType.warning,
+    borderSide: BorderSide(color: HexColor("FF5722"), width: 2),
+    width: MediaQuery.of(context).size.width * 0.75,
+    buttonsBorderRadius: BorderRadius.circular(15),
+    dismissOnTouchOutside: true,
+    dismissOnBackKeyPress: true,
+    headerAnimationLoop: false,
+    animType: AnimType.bottomSlide,
+    title: 'Warning',
+    desc: 'Are you sure you want to proceed?',
+    btnCancelText: "Cancel",
+    btnOkText: "Yes",
+    btnCancelOnPress: () {},
+    btnOkOnPress: () {},
+    btnCancelColor: Colors.grey.shade800,
+    btnOkColor: HexColor("00B96D"),
+    titleTextStyle: TextStyle(
+      color: Colors.white,
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+    ),
+    descTextStyle: TextStyle(
+      color: Colors.white70,
+      fontSize: 16,
+    ),
+    buttonsTextStyle: TextStyle(color: Colors.white),
+    dialogBackgroundColor: HexColor("121212"),
+  );
+}
+AwesomeDialog buildLightThemeDialog(BuildContext context) {
+  return AwesomeDialog(
+    context: context,
+    dialogType: DialogType.info,
+    borderSide: BorderSide(color: Colors.blue, width: 2),
+    width: MediaQuery.of(context).size.width * 0.75,
+    buttonsBorderRadius: BorderRadius.circular(15),
+    dismissOnTouchOutside: true,
+    dismissOnBackKeyPress: true,
+    headerAnimationLoop: false,
+    animType: AnimType.scale,
+    title: 'Information',
+    desc: 'This is an important notice.',
+    btnCancelText: "Close",
+    btnOkText: "Understood",
+    btnCancelOnPress: () {},
+    btnOkOnPress: () {},
+    btnCancelColor: Colors.grey.shade300,
+    btnOkColor: HexColor("00B96D"),
+    titleTextStyle: TextStyle(
+      color: Colors.black,
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+    ),
+    descTextStyle: TextStyle(
+      color: Colors.black54,
+      fontSize: 16,
+    ),
+    buttonsTextStyle: TextStyle(color: Colors.black),
+    dialogBackgroundColor: Colors.white,
+  );
+}

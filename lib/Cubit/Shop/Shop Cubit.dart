@@ -18,12 +18,18 @@ class ShopCubit extends Cubit<ShopStates> {
 
   static ShopCubit get(context) => BlocProvider.of(context);
   List firebaseProducts = [];
-  void getData() async{
-    firebaseProducts.clear();
-    QuerySnapshot query = await FirebaseFirestore.instance.collection('Products').get();
-    firebaseProducts.addAll(query.docs);
-    emit(GetFirebaseDataState());
+  void getData() async {
+    emit(GetFirebaseDataLoadingState()); // Optional: For showing a loading spinner
+    try {
+      firebaseProducts.clear();
+      QuerySnapshot query = await FirebaseFirestore.instance.collection('Products').get();
+      firebaseProducts.addAll(query.docs);
+      emit(GetFirebaseDataState());
+    } catch (error) {
+      emit(GetFirebaseDataErrorState(error.toString()));
+    }
   }
+
   Map<String, dynamic>? userData;
 
   // Method to get user by email
@@ -58,10 +64,21 @@ class ShopCubit extends Cubit<ShopStates> {
     'Admin Panel',
     'Profile',
   ];
+  List<String> adminTitles = [
+    'Home',
+    'Search',
+    'Admin Panel',
+    'Profile'
+  ];
   List<Widget> screens = [
     HomePage(),
     SearchScreen(),
     CartPage(),
+    ProfileScreen(),
+  ];
+  List<Widget> adminScreens = [
+    HomePage(),
+    SearchScreen(),
     AddProductScreen(),
     ProfileScreen(),
   ];
@@ -81,25 +98,47 @@ class ShopCubit extends Cubit<ShopStates> {
     });
   }
 
-  Future<void> addToCart(String title, String price, String description,
-      String category, String imageUrl, String rating, String count) async {
+  Future<void> addToCart(
+      String title, String price, String description, String category, String imageUrl, String rating, String count) async {
     try {
-      await FirebaseFirestore.instance.collection('Cart').add({
-        'title': title,
-        'price': price,
-        'description': description,
-        'category': category,
-        'imageUrl': imageUrl,
-        'rating': rating,
-        'count': count,
-        'id': FirebaseAuth.instance.currentUser!.uid,
-        'quantity': 1
-      });
+      // Get the current user's ID
+      final userId = FirebaseAuth.instance.currentUser!.uid;
 
-      emit(AddToCartSuccess());
-      // No need to call getCartData() here as we're using snapshots
+      // Query the Cart collection for the product with the same title and user ID
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Cart')
+          .where('title', isEqualTo: title)
+          .where('id', isEqualTo: userId)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Product already exists in the cart, update the quantity
+        final docId = querySnapshot.docs.first.id; // Get the document ID
+        final currentQuantity = querySnapshot.docs.first.data()['quantity'] as int;
+
+        await FirebaseFirestore.instance.collection('Cart').doc(docId).update({
+          'quantity': currentQuantity + 1,
+        });
+
+        emit(AddToCartSuccess());
+      } else {
+        // Product not found, add a new entry
+        await FirebaseFirestore.instance.collection('Cart').add({
+          'title': title,
+          'price': price,
+          'description': description,
+          'category': category,
+          'imageUrl': imageUrl,
+          'rating': rating,
+          'count': count,
+          'id': userId,
+          'quantity': 1,
+        });
+
+        emit(AddToCartSuccess());
+      }
     } catch (error) {
-      print("Failed to add item: $error");
+      print("Failed to add/update item: $error");
       emit(AddToCartError());
     }
   }
@@ -113,16 +152,7 @@ class ShopCubit extends Cubit<ShopStates> {
       products : [],
   );
 
-  void getHomeData() {
-    emit(ShopLoadingHomeDataState());
-    DioHelper.getData(url: 'products').then((value) {
-      productModel = ProductModel.fromJson(value.data);
-      emit(ShopSuccessHomeDataState());
-    }).catchError((error) {
-      print(error.toString());
-      emit(ShopErrorHomeDataState());
-    });
-  }
+
   List products =[];
   List filteredProducts = [];
   void loadProducts(List newProducts) {
@@ -162,12 +192,20 @@ List firebaseCategories = [];
       emit(ShopGetCategoriesError());
     }
   }
+  String selectedCategory = '';
+  void selectCategory(String categoryName) {
+    if (selectedCategory != categoryName) {
+      selectedCategory = categoryName;
+      getProductsFromCategory(categoryName);
+    }
+  }
   void getProductsFromCategory(String categoryName) async {
     emit(ShopLoadingCatProductsDataState());
     try {
       categoryProducts.clear();
       QuerySnapshot query = await FirebaseFirestore.instance.collection('${categoryName}').get();
       categoryProducts = query.docs;
+      print(categoryProducts.length);
       emit(ShopSuccessCatProductsDataState());
     } catch (error) {
       print('Error getting products for category $categoryName: $error');
@@ -175,14 +213,54 @@ List firebaseCategories = [];
     }
   }
 
-  void getCatProductsData(String name) {
-    emit(ShopLoadingCatProductsDataState());
-    DioHelper.getData(url: 'products/category/$name').then((value) {
-      categoryProductModel = ProductModel.fromJson(value.data);
-      emit(ShopSuccessCatProductsDataState());
-    }).catchError((error) {
-      print(error.toString());
-      emit(ShopErrorCatProductsDataState());
-    });
+
+  Future<void> updateProduct(String productId, String title, String price, String description) async {
+    try {
+      // Update the main 'Products' collection
+      await FirebaseFirestore.instance.collection('Products').doc(productId).update({
+        'title': title,
+        'price': price,
+        'description': description,
+      });
+
+      // Update local Data list
+      int index = firebaseProducts.indexWhere((product) => product['id'] == productId);
+      if (index != -1) {
+        firebaseProducts[index]['title'] = title;
+        firebaseProducts[index]['price'] = price;
+        firebaseProducts[index]['description'] = description;
+        emit(ProductsUpdatedState()); // Trigger UI rebuild
+      }
+
+      // Update corresponding product in the category collection
+      DocumentSnapshot productSnapshot = await FirebaseFirestore.instance.collection('Products').doc(productId).get();
+      if (productSnapshot.exists) {
+        String category = productSnapshot['category'];
+
+        // Get the collection reference for the specific category
+        CollectionReference categoryCollection = FirebaseFirestore.instance.collection(category);
+
+        // Search for the product in the category collection by title and update it
+        await categoryCollection.where('title', isEqualTo: title).limit(1).get().then((querySnapshot) async {
+          if (querySnapshot.docs.isNotEmpty) {
+            DocumentReference docRef = querySnapshot.docs.first.reference;
+            await docRef.update({
+              'title': title,
+              'price': price,
+              'description': description,
+            });
+          }
+        }).catchError((error) {
+          print("Failed to update product in category: $error");
+        });
+      }
+
+      emit(ProductUpdatedSuccessState());
+    } catch (error) {
+      emit(ProductUpdatedErrorState(error.toString()));
+    }
   }
+
+
+
 }

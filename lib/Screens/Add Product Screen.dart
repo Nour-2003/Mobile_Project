@@ -8,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mobileproject/Cubit/Shop/Shop%20Cubit.dart';
 import 'package:mobileproject/Cubit/Shop/Shop%20States.dart';
 
+import '../Cubit/Theme/Theme Cubit.dart';
+
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({Key? key}) : super(key: key);
 
@@ -33,19 +35,52 @@ class _AddProductScreenState extends State<AddProductScreen> {
   CollectionReference inventoryRef =
       FirebaseFirestore.instance.collection('Inventory');
 
-  Future<void> addUser() {
-    return Products.add({
-      'title': _titleController.text,
-      'price': _priceController.text,
-      'description': _descriptionController.text,
-      'category': _selectedCategory,
-      'imageUrl': _imageUrlController.text,
-      'rating': _ratingController.text,
-      'count': _countController.text,
-    })
-        .then((value) => {})
-        .catchError((error) => print("Failed to add product: $error"));
+  Future<void> addUser() async {
+    try {
+      // Add the product to the main 'Products' collection
+      await Products.add({
+        'title': _titleController.text,
+        'price': _priceController.text,
+        'description': _descriptionController.text,
+        'category': _selectedCategory,
+        'imageUrl': _imageUrlController.text,
+        'rating': _ratingController.text,
+        'count': _countController.text,
+      }).then((value) async {
+        // Get the collection reference for the specific category
+        CollectionReference categoryCollection =
+        FirebaseFirestore.instance.collection(_selectedCategory!);
+
+        // Add the product to the category collection
+        await categoryCollection.add({
+          'title': _titleController.text.toString(),
+          'price': _priceController.text.toString(),
+          'description': _descriptionController.text.toString(),
+          'imageUrl': _imageUrlController.text.toString(),
+          'rating': _ratingController.text.toString(),
+          'category': _selectedCategory.toString(),
+          'count': _countController.text.toString(),
+        }).then((value) {
+          print("Product added to both 'Products' and '$_selectedCategory' collections.");
+          _titleController.clear();
+          _priceController.clear();
+          _descriptionController.clear();
+          _imageUrlController.clear();
+          _ratingController.clear();
+          _countController.clear();
+        }).catchError((error) {
+          print("Failed to add product to category: $error");
+        });
+
+      }).catchError((error) {
+        print("Failed to add product to 'Products' collection: $error");
+      });
+    } catch (error) {
+      print("Error in addUser function: $error");
+    }
   }
+
+
 
   void getCategories() async {
     try {
@@ -97,6 +132,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               children: [
                                 // Title Field
                                 TextFormField(
+                                  style: ThemeCubit.get(context).themebool ?  TextStyle(color: Colors.white):TextStyle(color: Colors.black),
                                   controller: _titleController,
                                   decoration: const InputDecoration(
                                     labelText: 'Title',
@@ -113,6 +149,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
                                 // Price Field
                                 TextFormField(
+                                  style: ThemeCubit.get(context).themebool ?  TextStyle(color: Colors.white):TextStyle(color: Colors.black),
                                   controller: _priceController,
                                   decoration: const InputDecoration(
                                     labelText: 'Price',
@@ -133,6 +170,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
                                 // Description Field
                                 TextFormField(
+                                  style: ThemeCubit.get(context).themebool ?  TextStyle(color: Colors.white):TextStyle(color: Colors.black),
                                   controller: _descriptionController,
                                   decoration: const InputDecoration(
                                     labelText: 'Description',
@@ -150,6 +188,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
                                 // Category Dropdown
                                 DropdownButtonFormField<String>(
+                                  dropdownColor: ThemeCubit.get(context).themebool?Colors.grey[800]:Colors.white,
+                                    style: ThemeCubit.get(context).themebool ?  TextStyle(color: Colors.white):TextStyle(color: Colors.black),
                                   decoration: const InputDecoration(
                                     labelText: 'Category',
                                     border: OutlineInputBorder(),
@@ -177,6 +217,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
                                 // Image URL Field
                                 TextFormField(
+                                  style: ThemeCubit.get(context).themebool ?  TextStyle(color: Colors.white):TextStyle(color: Colors.black),
                                   controller: _imageUrlController,
                                   decoration: const InputDecoration(
                                     labelText: 'Image URL',
@@ -193,6 +234,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
                                 // Rating Field
                                 TextFormField(
+                                  style: ThemeCubit.get(context).themebool ?  TextStyle(color: Colors.white):TextStyle(color: Colors.black),
                                   controller: _ratingController,
                                   decoration: const InputDecoration(
                                     labelText: 'Rating (Rate)',
@@ -213,9 +255,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
                                 // Count Field
                                 TextFormField(
+                                    style: ThemeCubit.get(context).themebool ?  TextStyle(color: Colors.white):TextStyle(color: Colors.black) ,
                                   controller: _countController,
                                   decoration: const InputDecoration(
-                                    labelText: 'Rating (Count)',
+                                    labelText: 'Product Count',
                                     border: OutlineInputBorder(),
                                   ),
                                   keyboardType: TextInputType.number,
@@ -245,15 +288,27 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                             animType: AnimType.rightSlide,
                                             title: 'Add Product',
                                             desc: 'Product Added Successfully',
-                                          )..show();
+                                            btnOkOnPress: () {},
+                                            titleTextStyle: GoogleFonts
+                                                .montserrat(
+                                              fontSize: 20,
+                                              fontWeight:
+                                              FontWeight
+                                                  .bold,
+                                              color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                                            ),
+                                            descTextStyle:GoogleFonts
+                                                .montserrat(
+                                              fontSize: 17,
+                                              fontWeight:
+                                              FontWeight
+                                                  .bold,
+                                              color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                                            ) ,
+                                            dialogBackgroundColor: ThemeCubit.get(context).themebool ? Colors.grey[800]:Colors.white,
+                                          ).show();
                                           ShopCubit.get(context).getData();
                                         });
-                                        _titleController.clear();
-                                        _priceController.clear();
-                                        _descriptionController.clear();
-                                        _imageUrlController.clear();
-                                        _ratingController.clear();
-                                        _countController.clear();
                                       }
                                     },
                                     child: const Text('Add Product'),
@@ -288,6 +343,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               children: [
                                 // Title Field
                                 TextFormField(
+                                  style: ThemeCubit.get(context).themebool ?  TextStyle(color: Colors.white):TextStyle(color: Colors.black),
                                   controller: _titleController,
                                   decoration: const InputDecoration(
                                     labelText: 'Title',
@@ -303,6 +359,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                 const SizedBox(height: 16),
                                 // ImageUrl Field
                                 TextFormField(
+                                  style: ThemeCubit.get(context).themebool ?  TextStyle(color: Colors.white):TextStyle(color: Colors.black),
                                   controller: _imageUrlController,
                                   decoration: const InputDecoration(
                                     labelText: 'ImageUrl',
@@ -336,8 +393,27 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                             animType: AnimType.rightSlide,
                                             title: 'Add Category',
                                             desc: 'Category Added Successfully',
+                                            btnOkOnPress: () {},
+                                            titleTextStyle: GoogleFonts
+                                                .montserrat(
+                                              fontSize: 20,
+                                              fontWeight:
+                                              FontWeight
+                                                  .bold,
+                                              color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                                            ),
+                                            descTextStyle:GoogleFonts
+                                                .montserrat(
+                                              fontSize: 17,
+                                              fontWeight:
+                                              FontWeight
+                                                  .bold,
+                                              color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                                            ) ,
+                                            dialogBackgroundColor: ThemeCubit.get(context).themebool ? Colors.grey[800]:Colors.white,
                                           )..show();
                                           getCategories();
+                                          ShopCubit.get(context).getCategories();
                                         });
                                         _imageUrlController.clear();
                                         _titleController.clear();
@@ -359,7 +435,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   ),
                   ExpansionTile(
                     title: Text(
-                      'Get Orders',
+                      'All Transactions ',
                       style: GoogleFonts.montserrat(
                           fontSize: 18, fontWeight: FontWeight.bold),
                     ),
@@ -544,11 +620,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                 title: Text(
                                                   item['title'],
                                                   maxLines: 2,
-                                                  style: TextStyle(
+                                                  overflow:
+                                                  TextOverflow.ellipsis,
+                                                  style: GoogleFonts.montserrat(
                                                     fontSize: 16,
                                                     fontWeight: FontWeight.bold,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
+
                                                   ),
                                                 ),
                                                 subtitle: Column(
@@ -557,7 +634,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                   children: [
                                                     Text(
                                                       'Quantity: ${item['quantity']}',
-                                                      style: const TextStyle(
+                                                      style:  GoogleFonts.montserrat(
                                                           fontSize: 12,
                                                           color: Colors.grey),
                                                       maxLines: 1,
@@ -568,7 +645,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                     const SizedBox(height: 2),
                                                     Text(
                                                       'Price: \$${item['price']}',
-                                                      style: const TextStyle(
+                                                      style:GoogleFonts.montserrat(
                                                           fontSize: 12,
                                                           color: Colors.grey),
                                                       maxLines: 1,
@@ -579,7 +656,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                     const SizedBox(height: 2),
                                                     Text(
                                                       'Subtotal: \$${(double.parse(item['price']) * item['quantity']).toStringAsFixed(2)}',
-                                                      style: const TextStyle(
+                                                      style: GoogleFonts.montserrat(
                                                         fontSize: 12,
                                                         color: Colors.green,
                                                         fontWeight:
@@ -629,7 +706,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             return Center(
                               child: Text(
                                 'No inventory data found.',
-                                style: TextStyle(fontSize: 16, color: Colors.grey),
+                                style: GoogleFonts.montserrat(fontSize: 16, color: Colors.grey),
                               ),
                             );
                           }

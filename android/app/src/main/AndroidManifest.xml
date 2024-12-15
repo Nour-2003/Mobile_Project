@@ -10,7 +10,7 @@
         </intent>
     </queries>
     <application
-        android:label="mobileproject"
+        android:label="E-Commerce"
         android:name="${applicationName}"
         android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">

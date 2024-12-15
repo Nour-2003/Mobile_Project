@@ -62,6 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       'email': emailController.text, // Stokes and Sons
       'phone': phoneController.text, // 42
       'dateOfBirth': dateController.text, // 42// 42
+      'role':'user'
     })
         .then((value) => print("User Added"))
         .catchError((error) => print("Failed to add user: $error"));

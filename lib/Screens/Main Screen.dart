@@ -19,20 +19,25 @@ class MainScreen extends StatelessWidget {
           return  Scaffold(
               appBar: AppBar(
                 centerTitle: true,
-                title: Text(cubit.titles[cubit.currentIndex]),
+                title:Text(cubit.userData?['role'] == 'admin' ?cubit.adminTitles[cubit.currentIndex] : cubit.titles[cubit.currentIndex]),
               ),
-              body: cubit.screens[cubit.currentIndex],
+              body: cubit.userData?['role'] == 'admin'?cubit.adminScreens[cubit.currentIndex] :cubit.screens[cubit.currentIndex],
               bottomNavigationBar: BottomNavigationBar(
                 elevation: 10,
-                items: [
-                  BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-                  BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-
-                  BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
-                  BottomNavigationBarItem(icon: Icon(Icons.admin_panel_settings), label: 'Admin Panel'),
-                  BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-
-                ],
+                items:
+                  cubit.userData?['role'] == 'admin'
+                      ? [
+                    BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+                    BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+                    BottomNavigationBarItem(icon: Icon(Icons.admin_panel_settings), label: 'Admin Panel'),
+                    BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+                  ]
+                      : [
+                    BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+                    BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+                    BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Cart'),
+                    BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+                  ],
                 currentIndex: cubit.currentIndex,
                 onTap: (index) {
                   cubit.changeBottomNav(index);
