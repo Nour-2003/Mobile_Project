@@ -199,6 +199,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         const SizedBox(height: 15),
                         TextFormField(
+                          style: TextStyle(
+                            color: ThemeCubit.get(context).themebool
+                                ? Colors.white
+                                : Colors.black,
+                          ),
                           controller: dateController,
                           readOnly: true,
                           decoration: InputDecoration(
@@ -252,6 +257,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       dialogType: DialogType.error,
                                       animType: AnimType.rightSlide,
                                       title: 'Sign up Error',
+                                      titleTextStyle: GoogleFonts
+                                          .montserrat(
+                                        fontSize: 20,
+                                        fontWeight:
+                                        FontWeight
+                                            .bold,
+                                        color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                                      ),
+                                      descTextStyle:GoogleFonts
+                                          .montserrat(
+                                        fontSize: 17,
+                                        fontWeight:
+                                        FontWeight
+                                            .bold,
+                                        color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                                      ) ,
+                                      dialogBackgroundColor: ThemeCubit.get(context).themebool ? Colors.grey[800]:Colors.white,
                                       desc:
                                       'The password provided is too weak.',
                                     )..show();
@@ -262,6 +284,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       dialogType: DialogType.error,
                                       animType: AnimType.rightSlide,
                                       title: 'Dialog Title',
+                                      titleTextStyle: GoogleFonts
+                                          .montserrat(
+                                        fontSize: 20,
+                                        fontWeight:
+                                        FontWeight
+                                            .bold,
+                                        color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                                      ),
+                                      descTextStyle:GoogleFonts
+                                          .montserrat(
+                                        fontSize: 17,
+                                        fontWeight:
+                                        FontWeight
+                                            .bold,
+                                        color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                                      ) ,
+                                      dialogBackgroundColor: ThemeCubit.get(context).themebool ? Colors.grey[800]:Colors.white,
                                       desc:
                                       'The account already exists for that email.',
                                     )..show();
@@ -272,6 +311,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       dialogType: DialogType.error,
                                       animType: AnimType.rightSlide,
                                       title: 'Sign up Error',
+                                      titleTextStyle: GoogleFonts
+                                          .montserrat(
+                                        fontSize: 20,
+                                        fontWeight:
+                                        FontWeight
+                                            .bold,
+                                        color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                                      ),
+                                      descTextStyle:GoogleFonts
+                                          .montserrat(
+                                        fontSize: 17,
+                                        fontWeight:
+                                        FontWeight
+                                            .bold,
+                                        color: ThemeCubit.get(context).themebool ? Colors.white:Colors.black,
+                                      ) ,
+                                      dialogBackgroundColor: ThemeCubit.get(context).themebool ? Colors.grey[800]:Colors.white,
                                       desc: 'Wrong Email Format',
                                     )..show();
                                   }

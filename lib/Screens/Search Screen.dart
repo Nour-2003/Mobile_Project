@@ -191,35 +191,48 @@ class _SearchScreenState extends State<SearchScreen> {
                       shrinkWrap: true,
                       mainAxisSpacing: 10,
                       crossAxisSpacing: 10,
-                      childAspectRatio: 0.57,
+                      childAspectRatio: 0.58,
                       physics: const NeverScrollableScrollPhysics(),
                       crossAxisCount: 2,
                       children: List.generate(
                           cubit.filteredProducts.length, (index) {
                         var product = cubit.filteredProducts[index];
                         return GestureDetector(
-                          onTap: () {
-                           Navigator.push(context,
-                           MaterialPageRoute(builder: (context) => ProductDetails(
-                             role: cubit.userData?['role'],
-                             productId: product.id,
-                           title: product['title'],
-                           imageUrl: product['imageUrl'],
-                            price: product['price'],
-                            description: product['description'],
-                            rating: product['rating'],
-                            category: product['category'],
-                            reviews: product['count'],
-                           ))
-                           ).then((_) {
-                             initSpeech();
-                             BlocProvider.of<ShopCubit>(context).loadProducts(ShopCubit.get(context).firebaseProducts);
-                             WidgetsBinding.instance.addPostFrameCallback((_) {
-                               BlocProvider.of<ShopCubit>(context).searchProducts('');
-                             });
-                           });
-                          },
-                          child: Container(
+                            onTap: () {
+                              Navigator.push(context, PageRouteBuilder(
+                                pageBuilder: (context, animation, secondaryAnimation) => ProductDetails(
+                                  role: cubit.userData?['role'],
+                                  productId: product.id,
+                                  title: product['title'],
+                                  imageUrl: product['imageUrl'],
+                                  price: product['price'],
+                                  description: product['description'],
+                                  rating: product['rating'],
+                                  category: product['category'],
+                                  reviews: product['count'],
+                                ),
+                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                  const begin = Offset(0.0, 1.0); // Start from bottom
+                                  const end = Offset.zero; // End at the top
+                                  const curve = Curves.easeInOut; // Smooth curve
+
+                                  var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                                  var offsetAnimation = animation.drive(tween);
+
+                                  return SlideTransition(
+                                    position: offsetAnimation,
+                                    child: child,
+                                  );
+                                },
+                              )).then((_) {
+                                initSpeech();
+                                BlocProvider.of<ShopCubit>(context).loadProducts(ShopCubit.get(context).firebaseProducts);
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  BlocProvider.of<ShopCubit>(context).searchProducts('');
+                                });
+                              });
+                            },
+                            child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15),
                               boxShadow: [
@@ -278,22 +291,6 @@ class _SearchScreenState extends State<SearchScreen> {
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.blue),
-                                            ),
-                                            Material(
-                                              color: Colors.transparent,
-                                              borderRadius: BorderRadius.circular(20),
-                                              child: InkWell(
-                                                onTap: () {},
-                                                borderRadius: BorderRadius.circular(20),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(5),
-                                                  child: Icon(
-                                                    Icons.favorite_border,
-                                                    color: Colors.grey[600],
-                                                    size: 20,
-                                                  ),
-                                                ),
-                                              ),
                                             ),
                                           ],
                                         ),

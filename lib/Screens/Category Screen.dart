@@ -53,7 +53,7 @@ class CategoryScreen extends StatelessWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
-                childAspectRatio: 0.57,
+                childAspectRatio: 0.58,
               ),
               itemBuilder: (context, index) {
                 var product = cubit.categoryProducts[index];
@@ -74,7 +74,10 @@ class CategoryScreen extends StatelessWidget {
                           category: product['category'],
                         ),
                       ),
-                    );
+                    ).then((_) {
+                      cubit.selectCategory('');
+                      cubit.selectCategory(categoryName);
+                    });
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -140,25 +143,6 @@ class CategoryScreen extends StatelessWidget {
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.blue),
-                                    ),
-                                    Material(
-                                      color: Colors.transparent,
-                                      borderRadius:
-                                      BorderRadius.circular(20),
-                                      child: InkWell(
-                                        onTap: () {},
-                                        borderRadius:
-                                        BorderRadius.circular(20),
-                                        child: Padding(
-                                          padding:
-                                          const EdgeInsets.all(5),
-                                          child: Icon(
-                                            Icons.favorite_border,
-                                            color: Colors.grey[600],
-                                            size: 20,
-                                          ),
-                                        ),
-                                      ),
                                     ),
                                   ],
                                 ),

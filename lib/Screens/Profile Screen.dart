@@ -8,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mobileproject/Cubit/Shop/Shop%20Cubit.dart';
 import 'package:mobileproject/Cubit/Shop/Shop%20States.dart';
 import 'package:mobileproject/Screens/OnBoarding%20Screen.dart';
+import 'package:mobileproject/Shared/Constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Cubit/Theme/Theme Cubit.dart';
 import '../Cubit/Theme/Theme States.dart';
@@ -145,8 +147,9 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 30),
-                  // Sign-Out Button
+                  const SizedBox(height: 15),
+
+                // Sign-Out Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -161,10 +164,17 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       onPressed: () async {
                         await FirebaseAuth.instance.signOut();
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context) => OnBoardingScreen())
+
+                        // Clear shared preferences
+                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                        prefs.remove('rememberMe');
+                        prefs.remove('email');
+                        prefs.remove('password');
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => OnBoardingScreen()),
                         );
-                        // Implement logout functionality
                       },
                       child: Text(
                         "Sign Out",

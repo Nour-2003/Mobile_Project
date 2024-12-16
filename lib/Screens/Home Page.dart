@@ -64,14 +64,29 @@ class HomePage extends StatelessWidget {
                             itemBuilder: (context, index) => GestureDetector(
                               onTap: () {
                                 Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => CategoryScreen(
-                                      role: cubit.userData?['role'],
-                                      categoryName: categories[index]['name'],
-                                    ),
-                                  ),
-                                );
+                                    context,
+                                    PageRouteBuilder(
+                                      pageBuilder: (context, animation, secondaryAnimation) => CategoryScreen(
+                                        role: cubit.userData?['role'],
+                                        categoryName: categories[index]['name'],
+                                      ),
+                                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                        const begin = Offset(1.0, 0.0); // Start from right
+                                        const end = Offset.zero; // End at the current position
+                                        const curve = Curves.easeInOut; // Smooth curve
+
+                                        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                                        var offsetAnimation = animation.drive(tween);
+
+                                        return SlideTransition(
+                                          position: offsetAnimation,
+                                          child: child,
+                                        );
+                                      },
+                                    )
+                                ).then((_) {
+                                  cubit.selectCategory('');
+                                });
                               },
                               onLongPress: () async {
                                 // Check if the user is an admin
@@ -80,7 +95,10 @@ class HomePage extends StatelessWidget {
                                   bool confirmDelete = await showDialog(
                                     context: context,
                                     builder: (context) => AlertDialog(
-                                      title: Text('Delete Category'),
+                                      backgroundColor: ThemeCubit.get(context).themebool?Colors.grey[800]:Colors.white,
+                                      title: Text('Delete Category',style: GoogleFonts.montserrat(
+                                        color: ThemeCubit.get(context).themebool?Colors.white:Colors.black
+                                      ),),
                                       content: Text(
                                           'Are you sure you want to delete the ${categories[index]['name']} category and all associated data? This action cannot be undone.'),
                                       actions: [
@@ -139,7 +157,7 @@ class HomePage extends StatelessWidget {
                                       // Handle errors
                                       print('Error deleting category: $error');
                                       ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
+                                        const SnackBar(
                                           content: Text('Failed to delete category and associated data.'),
                                           backgroundColor: Colors.red,
                                         ),
@@ -149,7 +167,7 @@ class HomePage extends StatelessWidget {
                                 } else {
                                   // Non-admins get a warning or no action
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+                                    const SnackBar(
                                       content: Text('You do not have permission to delete categories.'),
                                       backgroundColor: Colors.orange,
                                     ),
@@ -233,7 +251,7 @@ class HomePage extends StatelessWidget {
                             shrinkWrap: true,
                             mainAxisSpacing: 10,
                             crossAxisSpacing: 10,
-                            childAspectRatio: 0.57,
+                            childAspectRatio: 0.58,
                             physics: const NeverScrollableScrollPhysics(),
                             crossAxisCount: 2,
                             children: List.generate(data.length, (index) {
@@ -243,8 +261,8 @@ class HomePage extends StatelessWidget {
                                       cubit.userData?['role'] ?? 'user';
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ProductDetails(
+                                    PageRouteBuilder(
+                                      pageBuilder: (context, animation, secondaryAnimation) => ProductDetails(
                                         role: role,
                                         productId: data[index].id,
                                         title: data[index]['title'],
@@ -255,10 +273,28 @@ class HomePage extends StatelessWidget {
                                         reviews: data[index]['count'],
                                         category: data[index]['category'],
                                       ),
+                                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                        const begin = Offset(0.0, 1.0); // Start from bottom
+                                        const end = Offset.zero;
+                                        const curve = Curves.easeInOut;
+
+                                        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                                        var offsetAnimation = animation.drive(tween);
+
+                                        return SlideTransition(
+                                          position: offsetAnimation,
+                                          child: FadeTransition(
+                                            opacity: animation,
+                                            child: child,
+                                          ),
+                                        );
+                                      },
+
                                     ),
                                   ).then((_) {
                                     cubit.getData();
                                   });
+
                                 },
                                 onLongPress: () {
                                   showDialog(
@@ -296,7 +332,7 @@ class HomePage extends StatelessWidget {
                                                           height: 200,
                                                           width:
                                                               double.infinity,
-                                                          fit: BoxFit.cover,
+                                                          fit: BoxFit.fill,
                                                           placeholder:
                                                               "Images/Animation - 1734121167586.gif",
                                                           image: data[index]
@@ -380,54 +416,39 @@ class HomePage extends StatelessWidget {
                                     ],
                                   ),
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       ClipRRect(
                                         borderRadius: const BorderRadius.only(
                                           topLeft: Radius.circular(15),
                                           topRight: Radius.circular(15),
                                         ),
-                                        // child: Image.network(
-                                        //   data[index]['imageUrl'],
-                                        //   height: 150,
-                                        //   width: double.infinity,
-                                        //   fit: BoxFit.cover,
-                                        // ),
-                                        child: (data[index]['imageUrl'] !=
-                                                    null &&
-                                                data[index]['imageUrl']
-                                                    .isNotEmpty)
+                                        child: (data[index]['imageUrl'] != null &&
+                                            data[index]['imageUrl'].isNotEmpty)
                                             ? FadeInImage.assetNetwork(
-                                                height: 150,
-                                                width: double.infinity,
-                                                fit: BoxFit.cover,
-                                                placeholder:
-                                                    "Images/Animation - 1734121167586.gif",
-                                                image: data[index]['imageUrl'],
-                                                imageErrorBuilder: (context,
-                                                    error, stackTrace) {
-                                                  // Show placeholder if the image fails to load
-                                                  return Image.asset(
-                                                      "Images/placeholder.png");
-                                                },
-                                              )
-                                            : Image.asset(
-                                                "Images/placeholder.png"),
+                                          height: 150,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                          placeholder: "Images/Animation - 1734121167586.gif",
+                                          image: data[index]['imageUrl'],
+                                          imageErrorBuilder: (context, error, stackTrace) {
+                                            return Image.asset("Images/placeholder.png");
+                                          },
+                                        )
+                                            : Image.asset("Images/placeholder.png"),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10, vertical: 10),
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                                         child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               "${data[index]['title']}",
                                               maxLines: 2,
                                               style: GoogleFonts.montserrat(
-                                                fontSize: 14,
+                                                fontSize: 15,
                                                 fontWeight: FontWeight.bold,
+                                                color: Theme.of(context).textTheme.titleLarge!.color,
                                               ),
                                               overflow: TextOverflow.ellipsis,
                                             ),
@@ -435,149 +456,94 @@ class HomePage extends StatelessWidget {
                                             Text(
                                               "${data[index]['category']}",
                                               style: GoogleFonts.montserrat(
-                                                fontSize: 12,
+                                                fontSize: 13,
                                                 color: Colors.grey,
                                               ),
                                             ),
                                             const SizedBox(height: 10),
                                             Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 5.0),
+                                              padding: const EdgeInsets.symmetric(horizontal: 5.0),
                                               child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                 children: [
                                                   Text(
                                                     "\$${data[index]['price']}",
-                                                    style:
-                                                        GoogleFonts.montserrat(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                                    style: GoogleFonts.montserrat(
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.bold,
                                                       color: Colors.blue,
                                                     ),
                                                   ),
-                                                  if (cubit.userData?['role'] ==
-                                                      'admin')
+                                                  if (cubit.userData?['role'] == 'admin')
                                                     Material(
                                                       color: Colors.transparent,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20),
+                                                      borderRadius: BorderRadius.circular(20),
                                                       child: InkWell(
                                                         onTap: () {
                                                           AwesomeDialog(
                                                             context: context,
-                                                            dialogType:
-                                                                DialogType
-                                                                    .warning,
-                                                            headerAnimationLoop:
-                                                                false,
-                                                            animType: AnimType
-                                                                .bottomSlide,
-                                                            title:
-                                                                'Are you sure?',
-                                                            desc:
-                                                                'Do you really want to delete this product? This action cannot be undone.',
-                                                            btnCancelOnPress:
-                                                                () {
-                                                              // Optionally handle cancel action here
-                                                            },
-                                                            btnOkOnPress:
-                                                                () async {
-                                                                  await FirebaseFirestore.instance
-                                                                      .collection('Products') // Original collection
-                                                                      .doc(data[index].id) // Document ID of the product to delete
+                                                            dialogType: DialogType.warning,
+                                                            headerAnimationLoop: false,
+                                                            animType: AnimType.bottomSlide,
+                                                            title: 'Are you sure?',
+                                                            desc: 'Do you really want to delete this product? This action cannot be undone.',
+                                                            btnCancelOnPress: () {},
+                                                            btnOkOnPress: () async {
+                                                              await FirebaseFirestore.instance
+                                                                  .collection('Products')
+                                                                  .doc(data[index].id)
+                                                                  .get()
+                                                                  .then((docSnapshot) {
+                                                                if (docSnapshot.exists) {
+                                                                  String category = docSnapshot.data()?['category'];
+                                                                  String title = docSnapshot.data()?['title'];
+
+                                                                  CollectionReference categoryCollection = FirebaseFirestore.instance.collection(category);
+                                                                  categoryCollection
+                                                                      .where('title', isEqualTo: title)
                                                                       .get()
-                                                                      .then((docSnapshot) {
-                                                                    if (docSnapshot.exists) {
-                                                                      String category = docSnapshot.data()?['category'];
-                                                                      String title = docSnapshot.data()?['title'];
-
-                                                                      // Reference to the specific category collection
-                                                                      CollectionReference categoryCollection = FirebaseFirestore.instance.collection(category);
-
-                                                                      // Query the category collection for matching title
-                                                                      categoryCollection
-                                                                          .where('title', isEqualTo: title)
-                                                                          .get()
-                                                                          .then((querySnapshot) {
-                                                                        if (querySnapshot.docs.isNotEmpty) {
-                                                                          // Delete the categorized product
-                                                                          categoryCollection.doc(querySnapshot.docs.first.id).delete();
-                                                                          print("Deleted categorized product with title '$title' from $category collection.");
-                                                                        } else {
-                                                                          print("No matching product found with title '$title' in $category collection.");
-                                                                        }
-
-                                                                        // Delete the product from the main 'Products' collection
-                                                                        FirebaseFirestore.instance.collection('Products').doc(data[index].id).delete();
-                                                                        print("Deleted product with title '$title' from 'Products' collection.");
-                                                                        cubit.getData(); // Reload data after deletion
-                                                                      })
-                                                                          .catchError((error) {
-                                                                        print("Failed to delete categorized product with title '$title': $error");
-                                                                      });
+                                                                      .then((querySnapshot) {
+                                                                    if (querySnapshot.docs.isNotEmpty) {
+                                                                      categoryCollection.doc(querySnapshot.docs.first.id).delete();
+                                                                      print("Deleted categorized product with title '$title' from $category collection.");
                                                                     } else {
-                                                                      print("Product not found in 'Products' collection.");
+                                                                      print("No matching product found with title '$title' in $category collection.");
                                                                     }
+
+                                                                    FirebaseFirestore.instance.collection('Products').doc(data[index].id).delete();
+                                                                    print("Deleted product with title '$title' from 'Products' collection.");
+                                                                    cubit.getData();
                                                                   })
                                                                       .catchError((error) {
-                                                                    print("Failed to find product in 'Products' collection: $error");
+                                                                    print("Failed to delete categorized product with title '$title': $error");
                                                                   });
-                                                                },
-                                                            btnOkColor:
-                                                                Colors.red,
-                                                            titleTextStyle:
-                                                                GoogleFonts
-                                                                    .montserrat(
+                                                                } else {
+                                                                  print("Product not found in 'Products' collection.");
+                                                                }
+                                                              })
+                                                                  .catchError((error) {
+                                                                print("Failed to find product in 'Products' collection: $error");
+                                                              });
+                                                            },
+                                                            btnOkColor: Colors.red,
+                                                            titleTextStyle: GoogleFonts.montserrat(
                                                               fontSize: 20,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color: ThemeCubit.get(
-                                                                          context)
-                                                                      .themebool
-                                                                  ? Colors.white
-                                                                  : Colors
-                                                                      .black,
+                                                              fontWeight: FontWeight.bold,
+                                                              color: ThemeCubit.get(context).themebool ? Colors.white : Colors.black,
                                                             ),
-                                                            descTextStyle:
-                                                                GoogleFonts
-                                                                    .montserrat(
+                                                            descTextStyle: GoogleFonts.montserrat(
                                                               fontSize: 17,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color: ThemeCubit.get(
-                                                                          context)
-                                                                      .themebool
-                                                                  ? Colors.white
-                                                                  : Colors
-                                                                      .black,
+                                                              fontWeight: FontWeight.bold,
+                                                              color: ThemeCubit.get(context).themebool ? Colors.white : Colors.black,
                                                             ),
-                                                            dialogBackgroundColor:
-                                                                ThemeCubit.get(
-                                                                            context)
-                                                                        .themebool
-                                                                    ? Colors.grey[
-                                                                        800]
-                                                                    : Colors
-                                                                        .white,
+                                                            dialogBackgroundColor: ThemeCubit.get(context).themebool ? Colors.grey[800] : Colors.white,
                                                             btnOkText: 'Delete',
-                                                            btnCancelText:
-                                                                'Cancel',
+                                                            btnCancelText: 'Cancel',
                                                           ).show();
                                                         },
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20),
+                                                        borderRadius: BorderRadius.circular(20),
                                                         child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(5),
+                                                          padding: const EdgeInsets.all(5),
                                                           child: Icon(
                                                             Icons.delete,
                                                             color: Colors.red,
@@ -587,47 +553,20 @@ class HomePage extends StatelessWidget {
                                                       ),
                                                     )
                                                   else
-                                                    Material(
-                                                      color: Colors.transparent,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20),
-                                                      child: InkWell(
-                                                        onTap: () {},
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20),
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(5),
-                                                          child: Icon(
-                                                            Icons
-                                                                .favorite_border,
-                                                            color: Colors.grey,
-                                                            size: 20,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
+                                                    Container()
                                                 ],
                                               ),
                                             ),
                                             const SizedBox(height: 10),
                                             Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 5.0),
+                                              padding: const EdgeInsets.symmetric(horizontal: 5.0),
                                               child: Row(
                                                 children: [
                                                   Row(
                                                     children: List.generate(
                                                       5,
-                                                      (starIndex) => Icon(
-                                                        starIndex <
-                                                                double.parse(data[
-                                                                        index]
-                                                                    ['rating'])
+                                                          (starIndex) => Icon(
+                                                        starIndex < double.parse(data[index]['rating'])
                                                             ? Icons.star
                                                             : Icons.star_border,
                                                         color: Colors.amber,
@@ -638,11 +577,9 @@ class HomePage extends StatelessWidget {
                                                   const SizedBox(width: 5),
                                                   Text(
                                                     "${data[index]['rating']}",
-                                                    style:
-                                                        GoogleFonts.montserrat(
+                                                    style: GoogleFonts.montserrat(
                                                       fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                                      fontWeight: FontWeight.bold,
                                                       color: Colors.grey[600],
                                                     ),
                                                   ),
@@ -653,7 +590,10 @@ class HomePage extends StatelessWidget {
                                         ),
                                       ),
                                     ],
-                                  ),
+                                  )
+
+
+                                  ,
                                 ),
                               );
                             }),

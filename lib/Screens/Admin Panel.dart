@@ -34,7 +34,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
       FirebaseFirestore.instance.collection('Products');
   CollectionReference inventoryRef =
       FirebaseFirestore.instance.collection('Inventory');
-
   Future<void> addUser() async {
     try {
       // Add the product to the main 'Products' collection
@@ -46,35 +45,20 @@ class _AddProductScreenState extends State<AddProductScreen> {
         'imageUrl': _imageUrlController.text,
         'rating': _ratingController.text,
         'count': _countController.text,
-      }).then((value) async {
-        // Get the collection reference for the specific category
-        CollectionReference categoryCollection =
-        FirebaseFirestore.instance.collection(_selectedCategory!);
+      }).then((value) {
+        print("Product added to 'Products' collection.");
 
-        // Add the product to the category collection
-        await categoryCollection.add({
-          'title': _titleController.text.toString(),
-          'price': _priceController.text.toString(),
-          'description': _descriptionController.text.toString(),
-          'imageUrl': _imageUrlController.text.toString(),
-          'rating': _ratingController.text.toString(),
-          'category': _selectedCategory.toString(),
-          'count': _countController.text.toString(),
-        }).then((value) {
-          print("Product added to both 'Products' and '$_selectedCategory' collections.");
-          _titleController.clear();
-          _priceController.clear();
-          _descriptionController.clear();
-          _imageUrlController.clear();
-          _ratingController.clear();
-          _countController.clear();
-        }).catchError((error) {
-          print("Failed to add product to category: $error");
-        });
-
+        // Clear the input fields after adding the product
+        _titleController.clear();
+        _priceController.clear();
+        _descriptionController.clear();
+        _imageUrlController.clear();
+        _ratingController.clear();
+        _countController.clear();
       }).catchError((error) {
         print("Failed to add product to 'Products' collection: $error");
       });
+
     } catch (error) {
       print("Error in addUser function: $error");
     }

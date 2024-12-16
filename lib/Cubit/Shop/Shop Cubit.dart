@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobileproject/Screens/Add%20Product%20Screen.dart';
+import 'package:mobileproject/Screens/Admin%20Panel.dart';
 import 'package:mobileproject/Screens/Search%20Screen.dart';
 import '../../Models/Product Model.dart';
 import '../../Screens/Cart screen.dart';
@@ -61,7 +61,6 @@ class ShopCubit extends Cubit<ShopStates> {
     'Home',
     'Search',
     'Cart',
-    'Admin Panel',
     'Profile',
   ];
   List<String> adminTitles = [
@@ -202,10 +201,17 @@ List firebaseCategories = [];
   void getProductsFromCategory(String categoryName) async {
     emit(ShopLoadingCatProductsDataState());
     try {
-      categoryProducts.clear();
-      QuerySnapshot query = await FirebaseFirestore.instance.collection('${categoryName}').get();
-      categoryProducts = query.docs;
-      print(categoryProducts.length);
+      categoryProducts.clear(); // Clear existing products first
+
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('Products').where('category', isEqualTo: categoryName).get();
+
+      // Filter products for the specified category
+      querySnapshot.docs.forEach((doc) {
+        if (doc['category'] == categoryName) {
+          categoryProducts.add(doc);
+        }
+      });
+
       emit(ShopSuccessCatProductsDataState());
     } catch (error) {
       print('Error getting products for category $categoryName: $error');
@@ -214,53 +220,29 @@ List firebaseCategories = [];
   }
 
 
-  Future<void> updateProduct(String productId, String title, String price, String description) async {
+
+  Future<void> updateProduct(String productId, String newTitle, String newPrice, String newDescription) async {
     try {
       // Update the main 'Products' collection
       await FirebaseFirestore.instance.collection('Products').doc(productId).update({
-        'title': title,
-        'price': price,
-        'description': description,
+        'title': newTitle,
+        'price': newPrice,
+        'description': newDescription,
       });
 
       // Update local Data list
       int index = firebaseProducts.indexWhere((product) => product['id'] == productId);
       if (index != -1) {
-        firebaseProducts[index]['title'] = title;
-        firebaseProducts[index]['price'] = price;
-        firebaseProducts[index]['description'] = description;
+        firebaseProducts[index]['title'] = newTitle;
+        firebaseProducts[index]['price'] = newPrice;
+        firebaseProducts[index]['description'] = newDescription;
         emit(ProductsUpdatedState()); // Trigger UI rebuild
       }
 
-      // Update corresponding product in the category collection
-      DocumentSnapshot productSnapshot = await FirebaseFirestore.instance.collection('Products').doc(productId).get();
-      if (productSnapshot.exists) {
-        String category = productSnapshot['category'];
-
-        // Get the collection reference for the specific category
-        CollectionReference categoryCollection = FirebaseFirestore.instance.collection(category);
-
-        // Search for the product in the category collection by title and update it
-        await categoryCollection.where('title', isEqualTo: title).limit(1).get().then((querySnapshot) async {
-          if (querySnapshot.docs.isNotEmpty) {
-            DocumentReference docRef = querySnapshot.docs.first.reference;
-            await docRef.update({
-              'title': title,
-              'price': price,
-              'description': description,
-            });
-          }
-        }).catchError((error) {
-          print("Failed to update product in category: $error");
-        });
-      }
-
-      emit(ProductUpdatedSuccessState());
     } catch (error) {
+      print("Error updating product: $error");
       emit(ProductUpdatedErrorState(error.toString()));
     }
   }
-
-
 
 }
