@@ -1,16 +1,26 @@
-# mobileproject
+# E-commerce Mobile Application  
 
-A new Flutter project.
+## Project Overview  
+This project is a feature-rich e-commerce mobile application powered by Firebase as the backend.  
 
-## Getting Started
+### Customer Features  
+- **Authentication**: Secure sign-up/login, "Remember Me," and password recovery.  
+- **Search & Navigation**: Search by text, voice, or barcode, and browse categories/products.  
+- **Shopping Cart**: Add/remove/edit product quantities and view order total before checkout.  
+- **Personalization**: Define the birthdate using a calendar widget.  
+- **Order Feedback**: Submit feedback and ratings for orders.  
+- **Dark Mode**: Toggle between light and dark modes for an enhanced user experience.  
 
-This project is a starting point for a Flutter application.
+### Admin Features  
+- **Product Management**: Add, edit, or delete products and categories with stock tracking.  
+- **Reports**: Generate detailed transaction reports for specific dates.  
+- **Feedback Analysis**: Review customer feedback and ratings for orders.  
+- **Analytics**: View charts of best-selling products to monitor sales performance.  
 
-A few resources to get you started if this is your first Flutter project:
+### Technology Stack  
+- **Database**: Firebase for real-time data synchronization and backend management.  
+- **UI/UX**: Dark mode implementation for improved accessibility and user comfort.  
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+This app delivers a seamless shopping experience for customers and robust tools for administrators.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
