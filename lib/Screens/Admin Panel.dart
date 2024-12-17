@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:mobileproject/Cubit/Shop/Shop%20Cubit.dart';
 import 'package:mobileproject/Cubit/Shop/Shop%20States.dart';
 
@@ -100,10 +101,21 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 children: [
                   // Add Product Section
                   ExpansionTile(
-                    title: Text(
-                      'Add Product',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 18, fontWeight: FontWeight.bold),
+                    title:Row(
+                      children: [
+                        Icon(
+                          Icons.add_box_outlined,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Add Product',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                     children: [
                       Form(
@@ -311,10 +323,21 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     height: 10,
                   ),
                   ExpansionTile(
-                    title: Text(
-                      'Add Category',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 18, fontWeight: FontWeight.bold),
+                    title:Row(
+                      children: [
+                        Icon(
+                          Icons.list_alt,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Add Category',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                     children: [
                       Form(
@@ -417,264 +440,393 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   SizedBox(
                     height: 10,
                   ),
-                  ExpansionTile(
-                    title: Text(
-                      'All Transactions ',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 18, fontWeight: FontWeight.bold),
+            ExpansionTile(
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.receipt_long_rounded,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'All Transactions',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
-                    children: [
-                      StreamBuilder<QuerySnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection('Orders')
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
-                          }
-                          if (snapshot.hasError) {
-                            return Center(
-                                child: Text('Error fetching orders.'));
-                          }
-                          if (!snapshot.hasData ||
-                              snapshot.data!.docs.isEmpty) {
-                            return Center(
-                              child: Text(
-                                'No orders found.',
-                                style:
-                                    TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                ],
+              ),
+              children: [
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance.collection('Orders').snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+                        ),
+                      );
+                    }
+
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Error fetching orders',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16,
+                                color: Colors.red[300],
                               ),
-                            );
-                          }
+                            ),
+                          ],
+                        ),
+                      );
+                    }
 
-                          final orders = snapshot.data!.docs;
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.shopping_bag_outlined,
+                              size: 48,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No orders found',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
 
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: orders.length,
-                            itemBuilder: (context, index) {
-                              final order = orders[index];
-                              final items = order['items'] as List<dynamic>;
-                              final status = order['status'];
-                              final total = order['total'];
-                              final timestamp = order['timestamp'];
-                              final rating = order['rating'] ??
-                                  0; // Default to 0 if rating is null
+                    final orders = snapshot.data!.docs;
 
-                              return AnimatedContainer(
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.easeInOut,
-                                margin: const EdgeInsets.symmetric(
-                                    vertical: 8, horizontal: 16),
-                                child: Card(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: ExpansionTile(
-                                      tilePadding: EdgeInsets.zero,
-                                      title: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              'Order ID: ${order.id.substring(0, 8)}...',
-                                              style: GoogleFonts.montserrat(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                          Chip(
-                                            label: Text(
-                                              status,
-                                              style: GoogleFonts.montserrat(
-                                                fontSize: 12,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            backgroundColor: status == 'pending'
-                                                ? Colors.orange
-                                                : Colors.green,
-                                          ),
-                                        ],
-                                      ),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const SizedBox(height: 8),
-                                          Row(
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: orders.length,
+                      itemBuilder: (context, index) {
+                        final order = orders[index];
+                        final items = order['items'] as List<dynamic>;
+                        final status = order['status'];
+                        final total = order['total'];
+                        final timestamp = order['timestamp'];
+                        final rating = order['rating'] ?? 0;
+
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeInOut,
+                          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          child: Card(
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              side: BorderSide(
+                                color: Theme.of(context).dividerColor.withOpacity(0.1),
+                                width: 1,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: ExpansionTile(
+                                tilePadding: EdgeInsets.zero,
+                                childrenPadding: const EdgeInsets.symmetric(vertical: 12),
+                                title: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Row(
                                             children: [
-                                              Text(
-                                                'Total:',
-                                                style: GoogleFonts.montserrat(
-                                                    fontSize: 14),
-                                              ),
-                                              Text(
-                                                '  \$${total.toString()}',
-                                                style: GoogleFonts.montserrat(
-                                                    fontSize: 14,
-                                                    color: Colors.blue),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            'Date: ${timestamp.toDate()}',
-                                            style: GoogleFonts.montserrat(
-                                              fontSize: 12,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Row(
-                                            children: [
-                                              Text(
-                                                'Rating:',
-                                                style: GoogleFonts.montserrat(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                              Icon(
+                                                Icons.shopping_bag_outlined,
+                                                size: 20,
+                                                color: Theme.of(context).primaryColor,
                                               ),
                                               const SizedBox(width: 8),
-                                              RatingBarIndicator(
-                                                rating: rating.toDouble(),
-                                                itemBuilder: (context, _) =>
-                                                    const Icon(
-                                                  Icons.star,
-                                                  color: Colors.amber,
+                                              Flexible(
+                                                child: Text(
+                                                  'Order ID: ${order.id.substring(0, 8)}...',
+                                                  style: GoogleFonts.montserrat(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
                                                 ),
-                                                itemCount: 5,
-                                                itemSize: 20.0,
-                                                direction: Axis.horizontal,
                                               ),
                                             ],
                                           ),
-                                        ],
-                                      ),
-                                      children: [
-                                        const Divider(),
-                                        ListView.builder(
-                                          shrinkWrap: true,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          itemCount: items.length,
-                                          itemBuilder: (context, itemIndex) {
-                                            final item = items[itemIndex];
-                                            return AnimatedPadding(
-                                              duration: const Duration(
-                                                  milliseconds: 300),
-                                              curve: Curves.easeInOut,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 4.0),
-                                              child: ListTile(
-                                                contentPadding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 8),
-                                                leading: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  child: Image.network(
-                                                    item['imageUrl'],
-                                                    width: 80,
-                                                    // Slightly increased for better visibility
-                                                    height: 80,
-                                                    fit: BoxFit.fitHeight,
-                                                    errorBuilder: (context,
-                                                            error,
-                                                            stackTrace) =>
-                                                        Container(
-                                                      width: 80,
-                                                      height: 80,
-                                                      color: Colors.grey,
-                                                      // Placeholder color when image fails to load
-                                                      child: const Icon(
-                                                          Icons.error,
-                                                          color: Colors.white),
-                                                    ),
-                                                  ),
-                                                ),
-                                                title: Text(
-                                                  item['title'],
-                                                  maxLines: 2,
-                                                  overflow:
-                                                  TextOverflow.ellipsis,
-                                                  style: GoogleFonts.montserrat(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-
-                                                  ),
-                                                ),
-                                                subtitle: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      'Quantity: ${item['quantity']}',
-                                                      style:  GoogleFonts.montserrat(
-                                                          fontSize: 12,
-                                                          color: Colors.grey),
-                                                      maxLines: 1,
-                                                      // Limit subtitle to 1 line
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                    const SizedBox(height: 2),
-                                                    Text(
-                                                      'Price: \$${item['price']}',
-                                                      style:GoogleFonts.montserrat(
-                                                          fontSize: 12,
-                                                          color: Colors.grey),
-                                                      maxLines: 1,
-                                                      // Limit subtitle to 1 line
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                    const SizedBox(height: 2),
-                                                    Text(
-                                                      'Subtotal: \$${(double.parse(item['price']) * item['quantity']).toStringAsFixed(2)}',
-                                                      style: GoogleFonts.montserrat(
-                                                        fontSize: 12,
-                                                        color: Colors.green,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                  ],
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: status == 'pending'
+                                                ? Colors.orange.withOpacity(0.1)
+                                                : Colors.green.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(20),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                status == 'pending'
+                                                    ? Icons.pending_outlined
+                                                    : Icons.check_circle_outline,
+                                                size: 16,
+                                                color: status == 'pending'
+                                                    ? Colors.orange
+                                                    : Colors.green,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                status,
+                                                style: GoogleFonts.montserrat(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: status == 'pending'
+                                                      ? Colors.orange
+                                                      : Colors.green,
                                                 ),
                                               ),
-                                            );
-                                          },
+                                            ],
+                                          ),
                                         ),
                                       ],
                                     ),
-                                  ),
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.attach_money,
+                                                size: 18,
+                                                color: Theme.of(context).primaryColor,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                '\$${total.toString()}',
+                                                style: GoogleFonts.montserrat(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Theme.of(context).primaryColor,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Text(
+                                          DateFormat('MMM dd, yyyy').format(timestamp.toDate()),
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 13,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.amber.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          RatingBarIndicator(
+                                            rating: rating.toDouble(),
+                                            itemBuilder: (context, _) => const Icon(
+                                              Icons.star_rounded,
+                                              color: Colors.amber,
+                                            ),
+                                            itemCount: 5,
+                                            itemSize: 18.0,
+                                            direction: Axis.horizontal,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            rating.toString(),
+                                            style: GoogleFonts.montserrat(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.amber[800],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+                                children: [
+                                  const Divider(height: 24),
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemCount: items.length,
+                                    itemBuilder: (context, itemIndex) {
+                                      final item = items[itemIndex];
+                                      return AnimatedPadding(
+                                        duration: const Duration(milliseconds: 300),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 8,
+                                          horizontal: 4,
+                                        ),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(
+                                              color: Theme.of(context).dividerColor.withOpacity(0.1),
+                                            ),
+                                          ),
+                                          child: ListTile(
+                                            contentPadding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 8,
+                                            ),
+                                            leading: Container(
+                                              width: 80,
+                                              height: 80,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(8),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black.withOpacity(0.1),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(8),
+                                                child: Image.network(
+                                                  item['imageUrl'],
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) =>
+                                                      Container(
+                                                        color: Colors.grey[200],
+                                                        child: const Icon(
+                                                          Icons.image_not_supported_outlined,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                ),
+                                              ),
+                                            ),
+                                            title: Text(
+                                              item['title'],
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: GoogleFonts.montserrat(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            subtitle: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                const SizedBox(height: 8),
+                                                Row(
+                                                  children: [
+                                                    _buildInfoChip(
+                                                      context,
+                                                      'Qty: ${item['quantity']}',
+                                                      Icons.shopping_cart_outlined,
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    _buildInfoChip(
+                                                      context,
+                                                      '\$${item['price']}',
+                                                      Icons.attach_money,
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 4,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.green.withOpacity(0.1),
+                                                    borderRadius: BorderRadius.circular(6),
+                                                  ),
+                                                  child: Text(
+                                                    'Subtotal: \$${(double.parse(item['price']) * item['quantity']).toStringAsFixed(2)}',
+                                                    style: GoogleFonts.montserrat(
+                                                      fontSize: 13,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Colors.green[700],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
                   SizedBox(
                     height: 10,
                   ),
                   ExpansionTile(
-                    title: Text(
-                      'Best Selling Products',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 18, fontWeight: FontWeight.bold),
+                    title: Row(
+                      children: [
+                        Icon(
+                          Icons.sell_rounded,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Best Selling Products',
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.montserrat(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                     children: [
                       StreamBuilder<QuerySnapshot>(
@@ -716,61 +868,55 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
                           return Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Row(
+                            child: Column(
                               children: [
-                                Expanded(
-                                  flex: 3, // Adjusted flex to fit better
-                                  child: AspectRatio(
-                                    aspectRatio: 0.8, // Smaller aspect ratio for a smaller chart
-                                    child: PieChart(
-                                      PieChartData(
-                                        sectionsSpace: 3,
-                                        borderData: FlBorderData(show: false),
-                                        sections: sortedList.take(5).map((entry) {
-                                          double percentage = (entry.value / quantityMap.values.fold(0.0, (sum, quantity) => sum + quantity)) * 100;
-                                          return PieChartSectionData(
-                                            value: entry.value,
-                                            title: '${percentage.toStringAsFixed(1)}%',
-                                            color: Colors.primaries[sortedList.indexOf(entry) % Colors.primaries.length],
-                                            radius: 50,
-                                            titleStyle: GoogleFonts.montserrat(
-                                              fontSize: 12,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          );
-                                        }).toList(),
-                                      ),
+                                AspectRatio(
+                                  aspectRatio: 1.4, // Smaller aspect ratio for a smaller chart
+                                  child: PieChart(
+                                    PieChartData(
+                                      sectionsSpace: 3,
+                                      borderData: FlBorderData(show: false),
+                                      sections: sortedList.take(5).map((entry) {
+                                        double percentage = (entry.value / quantityMap.values.fold(0.0, (sum, quantity) => sum + quantity)) * 100;
+                                        return PieChartSectionData(
+                                          value: entry.value,
+                                          title: '${percentage.toStringAsFixed(1)}%',
+                                          color: Colors.primaries[sortedList.indexOf(entry) % Colors.primaries.length],
+                                          radius: 50,
+                                          titleStyle: GoogleFonts.montserrat(
+                                            fontSize: 12,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        );
+                                      }).toList(),
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 20),
-                                Expanded(
-                                  flex: 3,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: sortedList.take(5).map((entry) {
-                                      return Row(
-                                        children: [
-                                          Container(
-                                            width: 20,
-                                            height: 20,
-                                            color: Colors.primaries[sortedList.indexOf(entry) % Colors.primaries.length],
+                                SizedBox(height: 20,),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: sortedList.take(5).map((entry) {
+                                    return Row(
+                                      children: [
+                                        Container(
+                                          width: 20,
+                                          height: 20,
+                                          color: Colors.primaries[sortedList.indexOf(entry) % Colors.primaries.length],
+                                        ),
+                                        SizedBox(width: 8),
+                                        Flexible(
+                                          child: Text(
+                                            '${entry.key} (${(entry.value / quantityMap.values.fold(0.0, (sum, quantity) => sum + quantity) * 100).toStringAsFixed(1)}%)',
+                                            style: GoogleFonts.montserrat(fontSize: 16, fontWeight: FontWeight.bold),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            softWrap: false,
                                           ),
-                                          SizedBox(width: 8),
-                                          Flexible(
-                                            child: Text(
-                                              '${entry.key} (${(entry.value / quantityMap.values.fold(0.0, (sum, quantity) => sum + quantity) * 100).toStringAsFixed(1)}%)',
-                                              style: GoogleFonts.montserrat(fontSize: 16, fontWeight: FontWeight.bold),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              softWrap: false,
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    }).toList(),
-                                  ),
+                                        ),
+                                      ],
+                                    );
+                                  }).toList(),
                                 ),
                               ],
                             ),
@@ -788,4 +934,32 @@ class _AddProductScreenState extends State<AddProductScreen> {
       },
     );
   }
+}
+Widget _buildInfoChip(BuildContext context, String label, IconData icon) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: Theme.of(context).primaryColor.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(6),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 14,
+          color: Theme.of(context).primaryColor,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: GoogleFonts.montserrat(
+            fontSize: 12,
+            color: Theme.of(context).primaryColor,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    ),
+  );
 }

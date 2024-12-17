@@ -1,3 +1,5 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -191,7 +193,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       shrinkWrap: true,
                       mainAxisSpacing: 10,
                       crossAxisSpacing: 10,
-                      childAspectRatio: 0.58,
+                      childAspectRatio: 0.48,
                       physics: const NeverScrollableScrollPhysics(),
                       crossAxisCount: 2,
                       children: List.generate(
@@ -247,84 +249,265 @@ class _SearchScreenState extends State<SearchScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                ClipRRect(
-                                  borderRadius: const BorderRadius.only(
-                                    topLeft: Radius.circular(15),
-                                    topRight: Radius.circular(15),
-                                  ),
-                                  child: Image(
-                                    image: NetworkImage(product['imageUrl']),
-                                    height: 150,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "${product['title']}",
-                                        maxLines: 2,
-                                        style: GoogleFonts.montserrat(
-                                            fontSize: 14, fontWeight: FontWeight.bold),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: 5),
-                                      Text(
-                                        "${product['category']}",
-                                        style: GoogleFonts.montserrat(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "\$${product['price']}",
-                                              style: GoogleFonts.montserrat(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.blue),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                                        child: Row(
-                                          children: [
-                                            Row(
-                                              children: List.generate(
-                                                5, // Assuming a 5-star rating system
-                                                    (starIndex) => Icon(
-                                                  starIndex < double.parse(product['rating'])
-                                                      ? Icons.star
-                                                      : Icons.star_border,
-                                                  color: Colors.amber,
-                                                  size: 16,
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 5),
-                                            Text(
-                                              "${product['rating']}", // Display numerical rating
-                                              style: GoogleFonts.montserrat(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey[600],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                // Enhanced Image Container
+                                Container(
+                                  decoration: BoxDecoration(
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        spreadRadius: 1,
+                                        blurRadius: 5,
+                                        offset: const Offset(0, 2),
                                       ),
                                     ],
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(15),
+                                      topRight: Radius.circular(15),
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        (product['imageUrl'] != null && product['imageUrl'].isNotEmpty)
+                                            ? FadeInImage.assetNetwork(
+                                          height: 180, // Slightly increased height
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                          placeholder: "Images/Animation - 1734121167586.gif",
+                                          image: product['imageUrl'],
+                                          imageErrorBuilder: (context, error, stackTrace) {
+                                            return Image.asset(
+                                              "Images/placeholder.png",
+                                              height: 180,
+                                              width: double.infinity,
+                                              fit: BoxFit.cover,
+                                            );
+                                          },
+                                        )
+                                            : Image.asset(
+                                          "Images/placeholder.png",
+                                          height: 180,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                        ),
+                                        // Add a subtle gradient overlay
+                                        Positioned.fill(
+                                          child: DecoratedBox(
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [
+                                                  Colors.transparent,
+                                                  Colors.black.withOpacity(0.2),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                // Enhanced Content Container
+                                Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.only(
+                                      bottomLeft: Radius.circular(15),
+                                      bottomRight: Radius.circular(15),
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        spreadRadius: 1,
+                                        blurRadius: 5,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // Title with enhanced typography
+                                        Text(
+                                          "${product['title']}",
+                                          maxLines: 2,
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            height: 1.2,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        // Category with pill background
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            "${product['category']}",
+                                            style: GoogleFonts.montserrat(
+                                              fontSize: 13,
+                                              color: Colors.blue,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        // Price and Admin Actions Row
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              // Enhanced price display
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.blue.withOpacity(0.1),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                child: Text(
+                                                  "\$${product['price']}",
+                                                  style: GoogleFonts.montserrat(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.blue,
+                                                  ),
+                                                ),
+                                              ),
+                                              // Admin delete button with enhanced styling
+                                              if (cubit.userData?['role'] == 'admin')
+                                                Material(
+                                                  color: Colors.red.withOpacity(0.1),
+                                                  borderRadius: BorderRadius.circular(20),
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      AwesomeDialog(
+                                                        context: context,
+                                                        dialogType: DialogType.warning,
+                                                        headerAnimationLoop: false,
+                                                        animType: AnimType.bottomSlide,
+                                                        title: 'Are you sure?',
+                                                        desc: 'Do you really want to delete this product? This action cannot be undone.',
+                                                        btnCancelOnPress: () {},
+                                                        btnOkOnPress: () async {
+                                                          await FirebaseFirestore.instance
+                                                              .collection('Products')
+                                                              .doc(product.id)
+                                                              .get()
+                                                              .then((docSnapshot) {
+                                                            if (docSnapshot.exists) {
+                                                              String category = docSnapshot.data()?['category'];
+                                                              String title = docSnapshot.data()?['title'];
+
+                                                              CollectionReference categoryCollection = FirebaseFirestore.instance.collection(category);
+                                                              categoryCollection
+                                                                  .where('title', isEqualTo: title)
+                                                                  .get()
+                                                                  .then((querySnapshot) {
+                                                                if (querySnapshot.docs.isNotEmpty) {
+                                                                  categoryCollection.doc(querySnapshot.docs.first.id).delete();
+                                                                  print("Deleted categorized product with title '$title' from $category collection.");
+                                                                } else {
+                                                                  print("No matching product found with title '$title' in $category collection.");
+                                                                }
+
+                                                                FirebaseFirestore.instance.collection('Products').doc(product.id).delete();
+                                                                print("Deleted product with title '$title' from 'Products' collection.");
+                                                                cubit.getData();
+                                                              })
+                                                                  .catchError((error) {
+                                                                print("Failed to delete categorized product with title '$title': $error");
+                                                              });
+                                                            } else {
+                                                              print("Product not found in 'Products' collection.");
+                                                            }
+                                                          })
+                                                              .catchError((error) {
+                                                            print("Failed to find product in 'Products' collection: $error");
+                                                          });
+                                                        },
+                                                        btnOkColor: Colors.red,
+                                                        titleTextStyle: GoogleFonts.montserrat(
+                                                          fontSize: 20,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: ThemeCubit.get(context).themebool ? Colors.white : Colors.black,
+                                                        ),
+                                                        descTextStyle: GoogleFonts.montserrat(
+                                                          fontSize: 17,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: ThemeCubit.get(context).themebool ? Colors.white : Colors.black,
+                                                        ),
+                                                        dialogBackgroundColor: ThemeCubit.get(context).themebool ? Colors.grey[800] : Colors.white,
+                                                        btnOkText: 'Delete',
+                                                        btnCancelText: 'Cancel',
+                                                      ).show();
+                                                    },
+                                                    borderRadius: BorderRadius.circular(20),
+                                                    child: Padding(
+                                                      padding: const EdgeInsets.all(8),
+                                                      child: Icon(
+                                                        Icons.delete_outline,
+                                                        color: Colors.red,
+                                                        size: 22,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )
+                                              else
+                                                Container()
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        // Enhanced Rating Display
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.amber.withOpacity(0.1),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    Row(
+                                                      children: List.generate(
+                                                        5,
+                                                            (starIndex) => Icon(
+                                                          starIndex < double.parse(product['rating'])
+                                                              ? Icons.star_rounded
+                                                              : Icons.star_outline_rounded,
+                                                          color: Colors.amber,
+                                                          size: 18,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 5),
+                                                    Text(
+                                                      "${product['rating']}",
+                                                      style: GoogleFonts.montserrat(
+                                                        fontSize: 13,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.amber[800],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],
